@@ -51,7 +51,7 @@ class ChatMessage(BaseModel):
     news_ids: List[str] = Field(default_factory=list, description="关联的新闻ID列表")
     
     # AI 生成相关
-    model_name: Optional[str] = Field(None, description="使用的模型名称")
+    llm_model: Optional[str] = Field(None, description="使用的模型名称")
     tokens_used: Optional[int] = Field(None, description="使用的令牌数")
     generation_time: Optional[float] = Field(None, description="生成时间（秒）")
 
@@ -85,7 +85,7 @@ class ChatSession(BaseModel):
     total_tokens: int = Field(default=0, description="总令牌数")
     
     # 设置
-    model_settings: Dict[str, Any] = Field(default_factory=dict, description="模型设置")
+    settings: Dict[str, Any] = Field(default_factory=dict, description="模型设置")
     
     # 元数据
     metadata: Dict[str, Any] = Field(default_factory=dict, description="会话元数据")
@@ -108,7 +108,7 @@ class ChatMessageCreate(BaseModel):
     news_limit: int = Field(default=5, ge=1, le=20, description="新闻搜索限制")
     
     # 模型设置
-    model_name: Optional[str] = Field(None, description="指定使用的模型")
+    llm_model: Optional[str] = Field(None, description="指定使用的模型")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="生成温度")
     max_tokens: int = Field(default=1000, ge=100, le=4000, description="最大令牌数")
 
@@ -116,7 +116,7 @@ class ChatMessageCreate(BaseModel):
 class ChatSessionCreate(BaseModel):
     """创建聊天会话模型"""
     title: Optional[str] = Field(None, description="会话标题", max_length=200)
-    model_settings: Dict[str, Any] = Field(default_factory=dict, description="模型设置")
+    settings: Dict[str, Any] = Field(default_factory=dict, description="模型设置")
 
 
 class ChatSessionUpdate(BaseModel):
@@ -124,7 +124,7 @@ class ChatSessionUpdate(BaseModel):
     title: Optional[str] = Field(None, description="会话标题", max_length=200)
     is_pinned: Optional[bool] = Field(None, description="是否置顶")
     status: Optional[ChatStatus] = Field(None, description="会话状态")
-    model_settings: Optional[Dict[str, Any]] = Field(None, description="模型设置")
+    settings: Optional[Dict[str, Any]] = Field(None, description="模型设置")
 
     class Config:
         from_attributes = True

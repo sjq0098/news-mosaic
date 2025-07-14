@@ -135,7 +135,7 @@ class NewsSearchQuery(BaseModel):
     limit: int = Field(default=20, ge=1, le=100, description="返回数量限制")
     offset: int = Field(default=0, ge=0, description="偏移量")
     sort_by: str = Field(default="published_at", description="排序字段")
-    sort_order: str = Field(default="desc", regex="^(asc|desc)$", description="排序方向")
+    sort_order: str = Field(default="desc", pattern="^(asc|desc)$", description="排序方向")
 
 
 class NewsSearchResponse(BaseModel):

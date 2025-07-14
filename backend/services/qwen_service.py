@@ -300,4 +300,13 @@ class QWENService:
         """关闭客户端连接"""
         if self.client:
             await self.client.aclose()
-            self.client = None 
+            self.client = None
+
+
+# 创建全局实例
+qwen_service = QWENService()
+
+
+async def get_qwen_service() -> QWENService:
+    """获取 QWEN 服务实例"""
+    return qwen_service 

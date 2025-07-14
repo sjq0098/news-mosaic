@@ -44,8 +44,8 @@ class SentimentAnalysis(BaseModel):
     reasons: List[str] = Field(default_factory=list, description="情感判断原因")
     
     # 模型信息
-    model_name: str = Field(..., description="使用的模型名称")
-    model_version: Optional[str] = Field(None, description="模型版本")
+    llm_model: str = Field(..., description="使用的模型名称")
+    version: Optional[str] = Field(None, description="模型版本")
     
     # 时间信息
     created_at: datetime = Field(default_factory=datetime.utcnow, description="创建时间")
@@ -76,7 +76,7 @@ class SentimentAnalysis(BaseModel):
 class SentimentAnalysisRequest(BaseModel):
     """情感分析请求模型"""
     text: str = Field(..., description="待分析文本", max_length=10000)
-    model_name: Optional[str] = Field(None, description="指定模型名称")
+    llm_model: Optional[str] = Field(None, description="指定模型名称")
     include_keywords: bool = Field(default=True, description="是否包含关键词分析")
     include_reasons: bool = Field(default=True, description="是否包含判断原因")
     
@@ -97,7 +97,7 @@ class SentimentResponse(BaseModel):
 class BatchSentimentRequest(BaseModel):
     """批量情感分析请求模型"""
     texts: List[str] = Field(..., description="待分析文本列表", max_items=100)
-    model_name: Optional[str] = Field(None, description="指定模型名称")
+    llm_model: Optional[str] = Field(None, description="指定模型名称")
     include_keywords: bool = Field(default=True, description="是否包含关键词分析")
     include_reasons: bool = Field(default=True, description="是否包含判断原因")
 
