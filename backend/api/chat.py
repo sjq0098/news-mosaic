@@ -10,19 +10,11 @@ from models.chat import (
     ChatResponse, ChatMessageCreate, ChatSessionCreate, ChatSessionUpdate,
     ChatSession, ChatMessage, ChatHistory, MessageReaction
 )
-from services.chat_service import ChatService
-from services.qwen_service import QWENService
+from services.chat_service import ChatService, get_chat_service
+from services.qwen_service import QWENService, get_qwen_service
 from core.cache import cache, CacheKeys
 
 router = APIRouter()
-
-def get_chat_service() -> ChatService:
-    """获取聊天服务实例"""
-    return ChatService()
-
-def get_qwen_service() -> QWENService:
-    """获取 QWEN 服务实例"""
-    return QWENService()
 
 
 @router.post("/send", response_model=ChatResponse)
