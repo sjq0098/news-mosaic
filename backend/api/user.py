@@ -49,28 +49,25 @@ async def get_current_user(
 @router.post("/register", response_model=UserResponse)
 async def register_user(
     user_data: UserCreate,
-    user_service: UserService = Depends(get_user_service)
+    auth_service: AuthService = Depends(get_auth_service)
 ):
     """用户注册"""
     
     try:
-        # 检查用户名和邮箱是否已存在
-        existing_user = await user_service.get_user_by_username(user_data.username)
-        if existing_user:
+        # 使用 auth_service 来创建用户（包含密码处理）
+        user = await auth_service.create_user_with_password(
+            username=user_data.username,
+            email=user_data.email,
+            password=user_data.password,
+            full_name=user_data.nickname
+        )
+        
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="用户名已存在"
+                detail="用户名或邮箱已存在"
             )
         
-        existing_email = await user_service.get_user_by_email(user_data.email)
-        if existing_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="邮箱已被注册"
-            )
-        
-        # 创建用户
-        user = await user_service.create_user(user_data)
         return user
         
     except HTTPException:
@@ -365,4 +362,4 @@ async def update_user_status(
             detail="用户不存在"
         )
     
-    return {"message": f"用户状态已更新为: {status}"} 
+    return {"message": f"用户状态已更新为: {status}"}

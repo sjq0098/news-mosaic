@@ -38,14 +38,14 @@ lxml==4.9.3
 python-dotenv==1.0.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
-
+pydantic[email]==2.5.0
 # 情感分析
 transformers==4.36.2
 torch==2.1.2
 
 # API 客户端
 serpapi==0.1.4
-bing-search-api==1.0.1
+# bing-search-api==1.0.1
 
 # 工具和测试
 pytest==7.4.3
@@ -60,4 +60,5 @@ prometheus-client==0.19.0
 
 # 安全
 passlib[bcrypt]==1.7.4
-python-jose[cryptography]==3.3.0 
+python-jose[cryptography]==3.3.0
+PyJWT==2.8.0

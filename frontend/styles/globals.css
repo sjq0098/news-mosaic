@@ -24,21 +24,129 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
 }
 
-/* 自定义样式 */
+/* 增强的自定义样式 */
 .news-card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow;
+  @apply bg-white rounded-xl shadow-soft border border-gray-100 hover:shadow-medium hover:border-primary-200 transition-all duration-300 transform hover:-translate-y-1;
+}
+
+.news-card-featured {
+  @apply bg-gradient-to-br from-primary-50 to-blue-50 border-primary-200 shadow-colored;
 }
 
 .chat-message {
-  @apply p-4 rounded-lg mb-4;
+  @apply p-4 rounded-xl mb-4 animate-slide-up;
 }
 
 .chat-message.user {
-  @apply bg-blue-100 ml-8;
+  @apply bg-gradient-to-r from-primary-100 to-blue-100 ml-8 border-l-4 border-primary-500;
 }
 
 .chat-message.assistant {
-  @apply bg-gray-100 mr-8;
-} 
+  @apply bg-gradient-to-r from-gray-50 to-slate-50 mr-8 border-l-4 border-gray-300;
+}
+
+.sentiment-positive {
+  @apply bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-200;
+}
+
+.sentiment-negative {
+  @apply bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200;
+}
+
+.sentiment-neutral {
+  @apply bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-200;
+}
+
+.glass-effect {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-large;
+}
+
+.shimmer-loading {
+  @apply bg-gradient-to-r from-gray-200 via-white to-gray-200 bg-[length:200%_100%] animate-shimmer;
+}
+
+.trend-up {
+  @apply text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.trend-down {
+  @apply text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.data-visualization {
+  @apply bg-white rounded-2xl shadow-medium p-6 border border-gray-100;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7);
+}
+
+/* 选择文本样式 */
+::selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* 焦点样式增强 */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white;
+}
+
+/* 加载状态 */
+.loading-dots {
+  @apply inline-flex space-x-1;
+}
+
+.loading-dots span {
+  @apply w-2 h-2 bg-primary-500 rounded-full animate-pulse;
+  animation-delay: calc(var(--i) * 0.2s);
+}
+
+/* 图表容器 */
+.chart-container {
+  @apply bg-white rounded-xl shadow-soft p-6 border border-gray-100;
+}
+
+/* 统计卡片 */
+.stat-card {
+  @apply bg-white rounded-xl shadow-soft p-6 border border-gray-100 hover:shadow-medium transition-shadow duration-300;
+}
+
+.stat-card-primary {
+  @apply bg-gradient-to-br from-primary-500 to-blue-600 text-white shadow-colored;
+}
+
+.stat-card-success {
+  @apply bg-gradient-to-br from-emerald-500 to-green-600 text-white;
+}
+
+.stat-card-warning {
+  @apply bg-gradient-to-br from-amber-500 to-orange-600 text-white;
+}
+
+/* 响应式网格 */
+.news-grid {
+  @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.analytics-grid {
+  @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
+}

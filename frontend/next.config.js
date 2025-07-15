@@ -7,6 +7,9 @@ const nextConfig = {
   // 输出配置
   output: 'standalone',
   
+  // 转译模块配置 - 解决Ant Design ES模块问题
+  transpilePackages: ['antd', '@ant-design/icons', '@ant-design/colors'],
+  
   // 环境变量
   env: {
     CUSTOM_KEY: 'my-value',
@@ -73,9 +76,8 @@ const nextConfig = {
     ];
   },
   
-  // 实验性功能
+  // 实验性功能 - 移除appDir，因为使用的是页面路由
   experimental: {
-    appDir: true,
     serverActions: true,
   },
   
@@ -86,6 +88,11 @@ const nextConfig = {
       test: /\.svg$/,
       use: ['@svgr/webpack'],
     });
+    
+    // 解决ES模块问题
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+    };
     
     return config;
   },
@@ -101,4 +108,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;
