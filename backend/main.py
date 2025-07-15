@@ -17,6 +17,7 @@ from core.database import init_database, close_database
 from core.cache import init_redis, close_redis
 from api import news, chat, user, sentiment
 from services.background_tasks import init_celery
+from api.embedding import router as embedding_router
 
 
 @asynccontextmanager
@@ -125,6 +126,7 @@ app.include_router(news.router, prefix="/api/v1/news", tags=["新闻"])
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["对话"])
 app.include_router(user.router, prefix="/api/v1/user", tags=["用户"])
 app.include_router(sentiment.router, prefix="/api/v1/sentiment", tags=["情感分析"])
+app.include_router(embedding_router, prefix="/api/v1/embedding", tags=["embedding"])
 
 
 if __name__ == "__main__":

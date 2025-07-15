@@ -98,6 +98,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = Field(default=60, description="每分钟请求限制")
     MAX_CONCURRENT_REQUESTS: int = Field(default=10, description="最大并发请求数")
     
+    # Embedding 配置
+    EMBEDDING_MODEL: str = Field(default="text-embedding-v3", description="QWen Embedding 模型")
+    EMBEDDING_CHUNK_SIZE: int = Field(default=512, description="文本分块大小（token）")
+    EMBEDDING_CHUNK_OVERLAP: int = Field(default=100, description="文本分块重叠（token）")
+    EMBEDDING_BATCH_SIZE: int = Field(default=10, description="Embedding 批处理大小")
+    EMBEDDING_DIMENSION: int = Field(default=1536, description="向量维度（text-embedding-v3）")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

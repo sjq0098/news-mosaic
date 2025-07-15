@@ -121,9 +121,9 @@
 
 * **B（后端·向量检索 & LLM 调度）**
 
-  * 文本切片与 Embedding 生成（QWEN‑Embedding/DeepSeek）
+  * 文本切片与 Embedding 生成（QWEN‑Embedding）
   * 向量库管理与 RAG 检索接口（Pinecone/Weaviate）
-  * 摘要卡片与情感分析 API（QWEN/DeepSeek + 自定义 Prompt）
+  * 摘要卡片与情感分析 API（QWEN + 自定义 Prompt）
 
 * **C（前端·界面与交互）**
 
