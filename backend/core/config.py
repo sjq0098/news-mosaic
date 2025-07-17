@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: str = Field(default="localhost,127.0.0.1", description="允许的主机")
     
     # LLM API 配置
-    QWEN_API_KEY: str = Field(default="", description="QWEN API 密钥")
-    QWEN_BASE_URL: str = Field(default="https://dashscope.aliyuncs.com/api/v1", description="QWEN API 基础URL")
-    QWEN_MODEL: str = Field(default="qwen-turbo", description="QWEN 模型")
+    QWEN_API_KEY: str = Field(default="", description="阿里云百炼API Key")
+    QWEN_BASE_URL: str = Field(default="https://dashscope.aliyuncs.com/compatible-mode/v1", description="QWEN API 基础URL")
+    QWEN_MODEL: str = Field(default="qwen-plus", description="QWEN 模型名称")
     
     DEEPSEEK_API_KEY: str = Field(default="", description="DeepSeek API 密钥")
     DEEPSEEK_BASE_URL: str = Field(default="https://api.deepseek.com/v1", description="DeepSeek API 基础URL")
@@ -78,8 +78,8 @@ class Settings(BaseSettings):
     SENTIMENT_MODEL: str = Field(default="cardiffnlp/twitter-roberta-base-sentiment-latest", description="情感分析模型")
     
     # 缓存配置
-    CACHE_TTL: int = Field(default=3600, description="缓存TTL（秒）")
-    NEWS_CACHE_TTL: int = Field(default=1800, description="新闻缓存TTL（秒）")
+    CACHE_TTL: int = Field(default=3600, description="缓存过期时间（秒）")
+    CACHE_MAX_SIZE: int = Field(default=1000, description="缓存最大大小")
     
     # 定时任务配置
     NEWS_FETCH_INTERVAL: int = Field(default=300, description="新闻获取间隔（秒）")
@@ -106,9 +106,27 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = Field(default=1536, description="向量维度（text-embedding-v3）")
     
     class Config:
+        """Pydantic配置"""
         env_file = ".env"
-        env_file_encoding = "utf-8"
         case_sensitive = True
+        
+    def __init__(self, **kwargs):
+        """初始化配置"""
+        super().__init__(**kwargs)
+        # 如果没有配置API密钥，使用模拟服务
+        if not self.QWEN_API_KEY:
+            self.QWEN_API_KEY = "demo-key"
+            self.QWEN_BASE_URL = "http://localhost:8001/mock"  # 模拟服务
+            
+    def is_api_configured(self, service: str = "qwen") -> bool:
+        """检查API是否正确配置"""
+        if service.lower() == "qwen":
+            return bool(self.QWEN_API_KEY and self.QWEN_API_KEY != "demo-key")
+        elif service.lower() == "deepseek":
+            return bool(self.DEEPSEEK_API_KEY)
+        elif service.lower() == "openai":
+            return bool(self.OPENAI_API_KEY)
+        return False
 
 
 # 创建全局配置实例

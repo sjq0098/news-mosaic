@@ -15,7 +15,7 @@ from loguru import logger
 from core.config import settings
 from core.database import init_database, close_database
 from core.cache import init_redis, close_redis
-from api import news, chat, user, sentiment
+from api import news, chat, user, sentiment, news_card
 from services.background_tasks import init_celery
 from api.embedding import router as embedding_router
 
@@ -127,6 +127,7 @@ app.include_router(chat.router, prefix="/api/v1/chat", tags=["对话"])
 app.include_router(user.router, prefix="/api/v1/user", tags=["用户"])
 app.include_router(sentiment.router, prefix="/api/v1/sentiment", tags=["情感分析"])
 app.include_router(embedding_router, prefix="/api/v1/embedding", tags=["embedding"])
+app.include_router(news_card.router, tags=["新闻卡片"])
 
 
 if __name__ == "__main__":

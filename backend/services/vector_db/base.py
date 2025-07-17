@@ -1,40 +1,27 @@
-"""vector_db/base.py
-向量数据库通用抽象接口，方便切换 Pinecone / Weaviate / Memory 等实现。
+"""向量数据库抽象接口
 """
-from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from dataclasses import dataclass
-import numpy as np
+from abc import ABC, abstractmethod
 
-# ---- 数据结构 -------------------------------------------------------------
+from models.embedding import EmbeddingResult
 
-@dataclass
-class ScoredDocument:
-    """向量检索返回的文档条目"""
-    news_id: str
-    score: float
-    metadata: Dict[str, Any]
-
-
-# ---- 抽象接口 -------------------------------------------------------------
 
 class IVectorDB(ABC):
-    """向量数据库操作统一接口"""
+    """统一向量数据库操作接口，支持 Pinecone / Weaviate / FAISS 等实现"""
 
     @abstractmethod
-    def init_index(self) -> None:
-        """确保索引/集合存在，如不存在则创建。"""
+    def init_index(self, dimension: int) -> None:
+        """确保索引/集合已创建，维度不匹配时应抛出异常"""
 
     @abstractmethod
-    async def upsert_embeddings(self, embeddings: List[np.ndarray], ids: List[str], metadatas: List[Dict[str, Any]]) -> None:
-        """批量写入/更新向量。length of three lists must match."""
+    def upsert_embeddings(self, results: List[EmbeddingResult]) -> None:
+        """批量写入或更新向量"""
 
     @abstractmethod
-    async def query(self, query_vector: np.ndarray, top_k: int = 5, **kwargs) -> List[ScoredDocument]:
-        """按向量相似度检索，返回 TopK ScoredDocument"""
+    def query_similar(self, query_text: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """相似度检索，返回 List[{"news_id", "score", "metadata"}]"""
 
     @abstractmethod
-    async def delete(self, ids: List[str]) -> None:
-        """根据文档 id 删除向量。""" 
+    def delete_by_source(self, source_id: str) -> None:
+        """按新闻 ID 删除向量（可选实现）""" 
