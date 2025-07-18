@@ -561,7 +561,7 @@ class CompletePipelineService:
             for news in unified_response.related_news:
                 tags = news.get("tags", [])
                 if tags:
-                    topics.extend(tags)
+                topics.extend(tags)
         
         # 去重并限制数量
         unique_topics = list(set(topics))
