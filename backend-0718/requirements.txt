@@ -1,0 +1,44 @@
+# ========== 核心框架 ==========
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.7.4
+pydantic-settings==2.4.0
+
+# ========== LangChain 生态系统 ==========
+# 按照用户指定的版本
+langchain==0.3.26
+langchain-core==0.3.69
+langchain-community==0.3.27
+langchain-experimental==0.3.4
+langsmith==0.4.6
+
+# ========== LangGraph 生态系统 ==========
+# 按照用户指定的版本
+langgraph==0.5.3
+langgraph-checkpoint==2.1.0
+langgraph-prebuilt==0.5.2
+langgraph-sdk==0.1.73
+
+# ========== 数据库 ==========
+motor==3.3.2
+pymongo==4.6.0
+
+# ========== HTTP 客户端 ==========
+httpx==0.25.2
+requests==2.31.0
+
+# ========== 网页解析 ==========
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# ========== 搜索API ==========
+google-search-results==2.4.2
+
+# ========== 大模型API ==========
+dashscope
+
+# ========== 其他工具 ==========
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
