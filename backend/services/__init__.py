@@ -12,4 +12,5 @@ __all__ = [
     "news_service", 
     "chat_service",
     #"embedding_service"
+    
 ] 

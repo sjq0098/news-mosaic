@@ -129,6 +129,10 @@ app.include_router(sentiment.router, prefix="/api/v1/sentiment", tags=["情感�
 app.include_router(embedding_router, prefix="/api/v1/embedding", tags=["embedding"])
 app.include_router(news_card.router, tags=["新闻卡片"])
 
+# 导入并注册Pipeline API
+from api.pipeline import router as pipeline_router
+app.include_router(pipeline_router, tags=["智能分析Pipeline"])
+
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -101,6 +101,21 @@ class QWenEmbeddingService:
         vector = await asyncio.to_thread(self.embedding_model.embed_query, text)
         return np.array(vector, dtype=np.float32)
     
+    async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """
+        获取文本的embedding向量 - 兼容性方法
+        """
+        try:
+            if not texts:
+                return []
+            
+            embeddings = await self.generate_embeddings_batch(texts)
+            # 转换为List[List[float]]格式
+            return [embedding.tolist() if hasattr(embedding, 'tolist') else list(embedding) for embedding in embeddings]
+        except Exception as e:
+            logger.error(f"获取embeddings失败: {e}")
+            return []
+    
     async def generate_embeddings_batch(self, texts: List[str]) -> List[np.ndarray]:
         """
         批量生成 embeddings
