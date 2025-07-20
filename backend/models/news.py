@@ -138,6 +138,17 @@ class NewsSearchQuery(BaseModel):
     sort_order: str = Field(default="desc", pattern="^(asc|desc)$", description="排序方向")
 
 
+class NewsSearchRequest(BaseModel):
+    """智能新闻搜索请求模型 - 支持智能助手"""
+    session_id: str = Field(..., description="会话ID")
+    keywords: List[str] = Field(..., description="搜索关键词列表")
+    num_results: int = Field(default=10, description="搜索结果数量", le=50)
+    language: str = Field(default="zh-cn", description="搜索语言")
+    country: str = Field(default="cn", description="搜索地区")
+    time_period: str = Field(default="1w", description="时间范围: 1d/1w/1m/1y")
+    expire_days: int = Field(default=7, description="新闻过期天数，默认7天")
+
+
 class NewsSearchResponse(BaseModel):
     """新闻搜索响应模型"""
     items: List[NewsResponse] = Field(..., description="新闻列表")
@@ -156,4 +167,4 @@ class NewsStats(BaseModel):
     sentiment_stats: Dict[str, int] = Field(..., description="情感统计")
     
     class Config:
-        from_attributes = True 
+        from_attributes = True

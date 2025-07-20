@@ -10,7 +10,8 @@ from services.news_service import get_news_service, NewsService, NewsSearchResul
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/news", tags=["新闻"])
+# 移除这里的 prefix，因为在 main.py 中已经设置了
+router = APIRouter(tags=["新闻"])
 
 
 class NewsSearchRequest(BaseModel):
@@ -245,4 +246,4 @@ async def get_news_categories():
         success=True,
         message="获取新闻分类成功",
         data={"categories": categories}
-    ) 
+    )

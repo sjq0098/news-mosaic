@@ -32,21 +32,104 @@ class QWENService:
     
     def __init__(self):
         self.api_key = settings.QWEN_API_KEY
-        self.base_url = settings.QWEN_BASE_URL
+        # 强制使用正确的URL
+        self.base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
         self.model = settings.QWEN_MODEL
         self.client = None
+        self.demo_mode = not settings.is_api_configured("qwen")
         
+        if self.demo_mode:
+            logger.warning("QWEN服务启用演示模式 - API未配置")
+        else:
+            logger.info(f"QWEN服务已初始化: {self.base_url}")
+    
     async def _get_client(self) -> httpx.AsyncClient:
-        """获取 HTTP 客户端"""
+        """获取HTTP客户端"""
         if self.client is None:
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
             self.client = httpx.AsyncClient(
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
+                headers=headers,
                 timeout=30.0
             )
+        
         return self.client
+    
+    async def _generate_demo_response(
+        self, 
+        user_message: str, 
+        chat_history: List[ChatMessage] = None
+    ) -> str:
+        """生成演示模式回复"""
+        prompt = user_message.lower()
+        
+        if "技术" in prompt or "突破" in prompt or "创新" in prompt:
+            return """从技术分析角度看，这一突破具有重要意义：
+
+**技术创新点**：
+- 突破了传统方法的局限
+- 在关键指标上有显著提升
+- 为行业发展提供新思路
+
+**影响分析**：
+- 短期内将推动相关技术发展
+- 可能催生新的应用场景
+- 对产业链上下游产生积极影响
+
+**发展建议**：
+- 持续关注技术演进
+- 评估对现有业务的影响
+- 考虑相关投资机会
+
+这是基于演示模式生成的回复，实际使用需要配置QWEN API。"""
+        
+        elif "对比" in prompt or "比较" in prompt:
+            return """从对比分析角度看：
+
+**优势方面**：
+- 在某些指标上表现突出
+- 具备独特的技术特点
+- 市场定位相对明确
+
+**差异化特征**：
+- 与现有方案有所不同
+- 针对特定场景优化
+- 成本效益有所改善
+
+这是演示模式下的对比分析，具体数据需要实际API支持。"""
+        
+        elif "预测" in prompt or "未来" in prompt:
+            return """从未来发展趋势预测：
+
+**短期前景**（1-2年）：
+- 技术逐步成熟和完善
+- 早期应用场景落地
+- 行业标准逐步建立
+
+**中长期展望**（3-5年）：
+- 大规模商业化应用
+- 形成完整产业生态
+- 推动相关领域变革
+
+这是演示模式的趋势预测，实际分析需要真实数据支持。"""
+        
+        else:
+            return f"""感谢您的问题："{user_message}"
+
+这是QWEN演示模式的回复。在演示模式下：
+- 可以展示对话交互流程
+- 提供模拟的智能回复
+- 验证系统功能完整性
+
+要获得真正的AI智能回复，请：
+1. 配置正确的阿里云百炼API Key
+2. 确保网络连接正常
+3. 验证API额度充足
+
+演示模式生成时间：{time.strftime('%Y-%m-%d %H:%M:%S')}"""
     
     async def generate_response(
         self,
@@ -70,6 +153,17 @@ class QWENService:
         """
         start_time = time.time()
         
+        # 如果是演示模式，使用模拟回复
+        if self.demo_mode:
+            await asyncio.sleep(0.5)  # 模拟API延迟
+            demo_content = await self._generate_demo_response(user_message, chat_history)
+            return QWENResponse(
+                content=demo_content,
+                tokens_used=len(demo_content) // 4,  # 估算token数
+                generation_time=time.time() - start_time,
+                news_ids=[]
+            )
+        
         try:
             # 构建系统提示词
             system_prompt = self._build_system_prompt(include_news)
@@ -81,41 +175,30 @@ class QWENService:
                 chat_history
             )
             
-            # 如果需要新闻，先搜索相关新闻
-            relevant_news = []
+            # 如果需要新闻上下文，先获取相关新闻
             if include_news:
-                relevant_news = await self._search_relevant_news(
-                    user_message, 
-                    limit=news_limit
-                )
-                
-                # 将新闻信息添加到消息中
-                if relevant_news:
-                    news_context = self._format_news_context(relevant_news)
-                    messages.append({
-                        "role": "system",
-                        "content": f"相关新闻信息：\n{news_context}"
-                    })
+                news_context = await self._get_news_context(user_message, news_limit)
+                if news_context:
+                    # 在系统提示词中加入新闻上下文
+                    enhanced_prompt = f"{system_prompt}\n\n相关新闻信息：\n{news_context}"
+                    messages[0]["content"] = enhanced_prompt
             
-            # 调用 QWEN API
-            response = await self._call_qwen_api(
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens
+            # 调用API
+            api_response = await self._call_qwen_api(
+                messages, 
+                temperature, 
+                max_tokens
             )
             
-            generation_time = time.time() - start_time
-            
             return QWENResponse(
-                content=response["content"],
-                tokens_used=response["tokens_used"],
-                generation_time=generation_time,
-                news_ids=[news["id"] for news in relevant_news] if relevant_news else []
+                content=api_response["content"],
+                tokens_used=api_response["tokens_used"],
+                generation_time=time.time() - start_time,
+                news_ids=api_response.get("news_ids", [])
             )
             
         except Exception as e:
             logger.error(f"QWEN 生成回复失败: {e}")
-            # 返回错误回复
             return QWENResponse(
                 content="抱歉，我遇到了一些问题，无法生成回复。请稍后再试。",
                 tokens_used=0,
@@ -125,25 +208,18 @@ class QWENService:
     
     def _build_system_prompt(self, include_news: bool = True) -> str:
         """构建系统提示词"""
-        base_prompt = """你是一个专业的新闻分析助手，名叫 News Mosaic AI。你的任务是：
+        base_prompt = """你是一个专业的新闻分析助手，具备以下能力：
 
-1. 帮助用户理解和分析新闻内容
-2. 提供客观、准确的信息摘要
-3. 进行情感分析和观点提炼
-4. 回答与新闻相关的问题
+1. 深度分析新闻事件的背景、影响和趋势
+2. 提供客观、准确的信息解读
+3. 回答用户关于新闻的各种问题
+4. 保持中立立场，避免主观偏见
 
-请遵循以下原则：
-- 保持客观中立，不带个人偏见
-- 提供准确、有用的信息
-- 使用简洁明了的中文回复
-- 当涉及敏感话题时保持谨慎
-- 如果信息不确定，请明确说明"""
-
+请用中文回复，语言简洁明了，逻辑清晰。"""
+        
         if include_news:
-            base_prompt += """
-
-当用户询问新闻相关问题时，我会为你提供相关的新闻信息。请基于这些新闻内容来回答用户的问题，并在适当时候引用具体的新闻内容。"""
-
+            base_prompt += "\n\n如果有相关新闻信息，请结合这些信息进行分析和回答。"
+        
         return base_prompt
     
     def _build_message_history(
@@ -155,43 +231,26 @@ class QWENService:
         """构建消息历史"""
         messages = [{"role": "system", "content": system_prompt}]
         
-        # 添加历史消息（保留最近的几条）
+        # 添加历史对话
         if chat_history:
-            # 只保留最近的 8 条消息以控制上下文长度
-            recent_history = chat_history[-8:] if len(chat_history) > 8 else chat_history
-            
-            for msg in recent_history:
-                if msg.role in ["user", "assistant"]:
-                    messages.append({
-                        "role": msg.role,
-                        "content": msg.content
-                    })
+            for msg in chat_history[-10:]:  # 只保留最近10条
+                messages.append({
+                    "role": msg.role,
+                    "content": msg.content
+                })
         
         # 添加当前用户消息
         messages.append({"role": "user", "content": user_message})
         
         return messages
     
-    async def _search_relevant_news(
-        self,
-        query: str,
-        limit: int = 5
-    ) -> List[Dict[str, Any]]:
-        """搜索相关新闻"""
-        try:
-            # 这里应该调用新闻搜索服务
-            # 暂时返回空列表，实际实现时需要集成新闻搜索
-            from services.news_service import NewsService
-            news_service = NewsService()
-            
-            # 模拟搜索结果
-            return []
-            
-        except Exception as e:
-            logger.error(f"搜索新闻失败: {e}")
-            return []
+    async def _get_news_context(self, query: str, limit: int = 5) -> str:
+        """获取相关新闻上下文"""
+        # TODO: 实现新闻检索逻辑
+        # 这里应该调用向量数据库或搜索服务
+        return ""
     
-    def _format_news_context(self, news_list: List[Dict[str, Any]]) -> str:
+    def _format_news_context(self, news_list: List[Dict]) -> str:
         """格式化新闻上下文"""
         if not news_list:
             return ""

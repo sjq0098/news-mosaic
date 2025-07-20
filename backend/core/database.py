@@ -4,8 +4,8 @@
 
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import declarative_base, sessionmaker
 from loguru import logger
 from typing import Optional
 
@@ -83,12 +83,22 @@ async def init_mysql():
             pool_recycle=300
         )
         
-        # 创建会话工厂
-        async_session_maker = async_sessionmaker(
-            async_engine,
-            class_=AsyncSession,
-            expire_on_commit=False
-        )
+        # 创建会话工厂 - 兼容不同SQLAlchemy版本
+        try:
+            # 尝试使用新版本的async_sessionmaker
+            from sqlalchemy.ext.asyncio import async_sessionmaker
+            async_session_maker = async_sessionmaker(
+                async_engine,
+                class_=AsyncSession,
+                expire_on_commit=False
+            )
+        except ImportError:
+            # 回退到旧版本的sessionmaker
+            async_session_maker = sessionmaker(
+                async_engine,
+                class_=AsyncSession,
+                expire_on_commit=False
+            )
         
         logger.info(f"MySQL 连接配置完成: {settings.MYSQL_HOST}:{settings.MYSQL_PORT}")
         
@@ -139,4 +149,4 @@ class Tables:
     """MySQL 表名称"""
     NEWS_EMBEDDINGS = "news_embeddings"
     USER_SESSIONS = "user_sessions"
-    API_LOGS = "api_logs" 
+    API_LOGS = "api_logs"

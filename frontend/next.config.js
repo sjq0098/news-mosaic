@@ -73,12 +73,6 @@ const nextConfig = {
     ];
   },
   
-  // 实验性功能
-  experimental: {
-    appDir: true,
-    serverActions: true,
-  },
-  
   // Webpack 配置
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // 自定义 webpack 配置
@@ -99,6 +93,17 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+  transpilePackages: [
+    'antd',
+    '@ant-design',
+    'rc-util',
+    'rc-pagination',
+    'rc-picker',
+    'rc-notification',
+    'rc-tooltip',
+    'rc-tree',
+    'rc-table',
+  ],
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: str = Field(default="localhost,127.0.0.1", description="允许的主机")
     
     # LLM API 配置
-    QWEN_API_KEY: str = Field(default="", description="QWEN API 密钥")
-    QWEN_BASE_URL: str = Field(default="https://dashscope.aliyuncs.com/api/v1", description="QWEN API 基础URL")
-    QWEN_MODEL: str = Field(default="qwen-turbo", description="QWEN 模型")
+    QWEN_API_KEY: str = Field(default="", description="阿里云百炼API Key")
+    QWEN_BASE_URL: str = Field(default="https://dashscope.aliyuncs.com/compatible-mode/v1", description="QWEN API 基础URL")
+    QWEN_MODEL: str = Field(default="qwen-plus", description="QWEN 模型名称")
     
     DEEPSEEK_API_KEY: str = Field(default="", description="DeepSeek API 密钥")
     DEEPSEEK_BASE_URL: str = Field(default="https://api.deepseek.com/v1", description="DeepSeek API 基础URL")
@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     BING_SEARCH_API_KEY: str = Field(default="", description="Bing 搜索 API 密钥")
     BING_SEARCH_ENDPOINT: str = Field(default="https://api.bing.microsoft.com/v7.0/news/search", description="Bing 搜索端点")
     SERPAPI_KEY: str = Field(default="", description="SerpAPI 密钥")
+    
+    # 智能助手配置
+    DASHSCOPE_API_KEY: str = Field(default="", description="阿里云灵积 API 密钥")
+    AVAILABLE_AI_MODELS: List[str] = Field(default=["qwen-turbo", "qwen-plus", "qwen-max"], description="可用的AI模型列表")
+    DEFAULT_AI_MODEL: str = Field(default="qwen-turbo", description="默认AI模型")
     
     # 向量数据库配置
     PINECONE_API_KEY: str = Field(default="", description="Pinecone API 密钥")
@@ -78,8 +83,8 @@ class Settings(BaseSettings):
     SENTIMENT_MODEL: str = Field(default="cardiffnlp/twitter-roberta-base-sentiment-latest", description="情感分析模型")
     
     # 缓存配置
-    CACHE_TTL: int = Field(default=3600, description="缓存TTL（秒）")
-    NEWS_CACHE_TTL: int = Field(default=1800, description="新闻缓存TTL（秒）")
+    CACHE_TTL: int = Field(default=3600, description="缓存过期时间（秒）")
+    CACHE_MAX_SIZE: int = Field(default=1000, description="缓存最大大小")
     
     # 定时任务配置
     NEWS_FETCH_INTERVAL: int = Field(default=300, description="新闻获取间隔（秒）")
@@ -98,14 +103,39 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = Field(default=60, description="每分钟请求限制")
     MAX_CONCURRENT_REQUESTS: int = Field(default=10, description="最大并发请求数")
     
+    # Embedding 配置
+    EMBEDDING_MODEL: str = Field(default="text-embedding-v3", description="QWen Embedding 模型")
+    EMBEDDING_CHUNK_SIZE: int = Field(default=512, description="文本分块大小（token）")
+    EMBEDDING_CHUNK_OVERLAP: int = Field(default=100, description="文本分块重叠（token）")
+    EMBEDDING_BATCH_SIZE: int = Field(default=10, description="Embedding 批处理大小")
+    EMBEDDING_DIMENSION: int = Field(default=1536, description="向量维度（text-embedding-v3）")
+    
     class Config:
+        """Pydantic配置"""
         env_file = ".env"
-        env_file_encoding = "utf-8"
         case_sensitive = True
+        
+    def __init__(self, **kwargs):
+        """初始化配置"""
+        super().__init__(**kwargs)
+        # 如果没有配置API密钥，使用模拟服务
+        if not self.QWEN_API_KEY:
+            self.QWEN_API_KEY = "demo-key"
+            self.QWEN_BASE_URL = "http://localhost:8001/mock"  # 模拟服务
+            
+    def is_api_configured(self, service: str = "qwen") -> bool:
+        """检查API是否正确配置"""
+        if service.lower() == "qwen":
+            return bool(self.QWEN_API_KEY and self.QWEN_API_KEY != "demo-key")
+        elif service.lower() == "deepseek":
+            return bool(self.DEEPSEEK_API_KEY)
+        elif service.lower() == "openai":
+            return bool(self.OPENAI_API_KEY)
+        return False
 
 
 # 创建全局配置实例
 settings = Settings()
 
 # 确保日志目录存在
-os.makedirs(os.path.dirname(settings.LOG_FILE), exist_ok=True) 
+os.makedirs(os.path.dirname(settings.LOG_FILE), exist_ok=True)

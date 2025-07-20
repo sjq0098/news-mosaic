@@ -15,8 +15,9 @@ from loguru import logger
 from core.config import settings
 from core.database import init_database, close_database
 from core.cache import init_redis, close_redis
-from api import news, chat, user, sentiment
+from api import news, chat, user, sentiment, news_card
 from services.background_tasks import init_celery
+from api.embedding import router as embedding_router
 
 
 @asynccontextmanager
@@ -121,10 +122,22 @@ async def health_check():
 
 
 # 注册路由
-app.include_router(news.router, prefix="/api/v1/news", tags=["新闻"])
-app.include_router(chat.router, prefix="/api/v1/chat", tags=["对话"])
-app.include_router(user.router, prefix="/api/v1/user", tags=["用户"])
-app.include_router(sentiment.router, prefix="/api/v1/sentiment", tags=["情感分析"])
+app.include_router(news.router, prefix="/api/news", tags=["新闻"])
+app.include_router(chat.router, prefix="/api/chat", tags=["对话"])
+app.include_router(user.router, prefix="/api/user", tags=["用户"])
+app.include_router(sentiment.router, prefix="/api/sentiment", tags=["情感分析"])
+app.include_router(embedding_router, prefix="/api/embedding", tags=["embedding"])
+app.include_router(news_card.router, tags=["新闻卡片"])
+
+
+
+# 导入并注册Pipeline API
+from api.pipeline import router as pipeline_router
+app.include_router(pipeline_router, tags=["智能分析Pipeline"])
+
+# 导入并注册智能聊天API
+from api.intelligent_chat import router as intelligent_chat_router
+app.include_router(intelligent_chat_router, prefix="/api/v1/intelligent", tags=["智能助手"])
 
 
 if __name__ == "__main__":
@@ -134,4 +147,4 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
         log_level=settings.LOG_LEVEL.lower()
-    ) 
+    )

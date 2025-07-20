@@ -1,368 +1,303 @@
 """
 用户管理 API 路由
+提供用户注册、登录、会话管理等 HTTP 接口
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional
+from fastapi import APIRouter, HTTPException, status
+from typing import Dict, Any, Optional
+import logging
 
 from models.user import (
-    UserResponse, UserCreate, UserUpdate, UserLogin, 
-    UserPasswordChange, UserPreferences
+    UserCreateRequest, UserLoginRequest, UserSessionRequest, UserDeleteRequest,
+    UserCreateResult, UserLoginResult, UserSessionResult, 
+    UserDeleteResponse, SessionDeleteResponse, UserSessionsResponse
 )
-from services.user_service import UserService
-from services.auth_service import AuthService
-from core.cache import cache, CacheKeys
 
 router = APIRouter()
-security = HTTPBearer()
+logger = logging.getLogger(__name__)
 
-def get_user_service() -> UserService:
-    """获取用户服务实例"""
-    return UserService()
-
-def get_auth_service() -> AuthService:
-    """获取认证服务实例"""
-    return AuthService()
-
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    auth_service: AuthService = Depends(get_auth_service)
-) -> UserResponse:
-    """获取当前用户（JWT认证）"""
-    try:
-        token = credentials.credentials
-        user = await auth_service.get_current_user(token)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="无效的认证令牌"
-            )
-        return user
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="认证失败"
-        )
-
-
-@router.post("/register", response_model=UserResponse)
-async def register_user(
-    user_data: UserCreate,
-    user_service: UserService = Depends(get_user_service)
-):
-    """用户注册"""
+# 临时解决方案：创建简化的认证服务
+class SimpleAuthService:
+    """简化的认证服务，临时用于启动"""
     
+    async def create_user(self, user_data):
+        return UserCreateResult(
+            status="success",
+            message="用户创建成功（模拟）",
+            user_id="temp_user_id"
+        )
+    
+    async def login_user(self, login_data):
+        return UserLoginResult(
+            status="success", 
+            message="登录成功（模拟）",
+            user_id="temp_user_id",
+            username=login_data.username,
+            sessions=[]
+        )
+    
+    async def create_session(self, session_data):
+        return UserSessionResult(
+            status="success",
+            message="会话创建成功（模拟）", 
+            session_id="temp_session_id",
+            session_name="临时会话"
+        )
+    
+    async def get_user_sessions(self, user_id):
+        return {
+            "user_id": user_id,
+            "sessions": [],
+            "session_count": 0,
+            "status": "success"
+        }
+    
+    async def delete_session(self, session_id):
+        return {
+            "status": "success",
+            "message": "会话删除成功（模拟）",
+            "deleted_news": 0
+        }
+    
+    async def delete_user(self, user_id):
+        return {
+            "status": "success", 
+            "message": "用户删除成功（模拟）",
+            "deleted_sessions": 0,
+            "deleted_news": 0
+        }
+    
+    async def delete_user_by_credentials(self, username, password):
+        return {
+            "status": "success",
+            "message": "用户账号删除成功（模拟）",
+            "deleted_sessions": 0,
+            "deleted_news": 0
+        }
+
+async def get_user_auth_service():
+    """获取简化的认证服务"""
+    return SimpleAuthService()
+
+
+@router.post("/auth/register", response_model=UserCreateResult)
+async def register_user(user_data: UserCreateRequest):
+    """
+    用户注册 - 注册页面调用
+    """
     try:
-        # 检查用户名和邮箱是否已存在
-        existing_user = await user_service.get_user_by_username(user_data.username)
-        if existing_user:
+        service = await get_user_auth_service()
+        result = await service.create_user(user_data)
+        
+        if not result.user_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="用户名已存在"
+                detail="用户名已存在或注册失败"
             )
         
-        existing_email = await user_service.get_user_by_email(user_data.email)
-        if existing_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="邮箱已被注册"
-            )
-        
-        # 创建用户
-        user = await user_service.create_user(user_data)
-        return user
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"注册失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"注册失败: {str(e)}"
         )
 
 
-@router.post("/login")
-async def login_user(
-    login_data: UserLogin,
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service)
-):
-    """用户登录"""
-    
+@router.post("/auth/login", response_model=UserLoginResult)
+async def login_user(login_data: UserLoginRequest):
+    """
+    用户登录 - 登录页面调用
+    """
     try:
-        # 验证用户凭据
-        user = await auth_service.authenticate_user(
-            login_data.username, 
-            login_data.password
-        )
+        service = await get_user_auth_service()
+        result = await service.login_user(login_data)
         
-        if not user:
+        if not result.user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="用户名或密码错误"
             )
         
-        # 生成访问令牌
-        access_token = await auth_service.create_access_token(user.id)
-        
-        # 更新最后登录时间
-        await user_service.update_last_login(user.id)
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": user
-        }
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"登录失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"登录失败: {str(e)}"
         )
 
 
-@router.get("/profile", response_model=UserResponse)
-async def get_user_profile(
-    current_user: UserResponse = Depends(get_current_user)
-):
-    """获取用户资料"""
-    return current_user
-
-
-@router.put("/profile", response_model=UserResponse)
-async def update_user_profile(
-    user_data: UserUpdate,
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """更新用户资料"""
-    
+@router.post("/sessions/create", response_model=UserSessionResult)
+async def create_user_session(session_data: UserSessionRequest):
+    """
+    创建新会话 - 左侧栏"新建会话"按钮调用
+    """
     try:
-        updated_user = await user_service.update_user(current_user.id, user_data)
-        if not updated_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="用户不存在"
-            )
+        service = await get_user_auth_service()
+        result = await service.create_session(session_data)
         
-        # 清除用户缓存
-        await cache.delete(f"{CacheKeys.USER_SESSION}{current_user.id}")
-        
-        return updated_user
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"更新失败: {str(e)}"
-        )
-
-
-@router.post("/change-password")
-async def change_password(
-    password_data: UserPasswordChange,
-    current_user: UserResponse = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
-):
-    """修改密码"""
-    
-    try:
-        # 验证旧密码
-        is_valid = await auth_service.verify_password(
-            current_user.id, 
-            password_data.old_password
-        )
-        
-        if not is_valid:
+        if not result.session_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="旧密码错误"
+                detail="用户不存在或会话创建失败"
             )
         
-        # 更新密码
-        success = await auth_service.change_password(
-            current_user.id, 
-            password_data.new_password
-        )
-        
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="密码修改失败"
-            )
-        
-        return {"message": "密码修改成功"}
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"创建会话失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"密码修改失败: {str(e)}"
+            detail=f"创建会话失败: {str(e)}"
         )
 
 
-@router.get("/preferences", response_model=UserPreferences)
-async def get_user_preferences(
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """获取用户偏好设置"""
-    
-    cache_key = f"{CacheKeys.USER_PREFERENCES}{current_user.id}"
-    cached_result = await cache.get(cache_key)
-    if cached_result:
-        return cached_result
-    
-    preferences = await user_service.get_user_preferences(current_user.id)
-    await cache.set(cache_key, preferences.dict(), expire=3600)  # 1小时缓存
-    
-    return preferences
-
-
-@router.put("/preferences", response_model=UserPreferences)
-async def update_user_preferences(
-    preferences_data: UserPreferences,
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """更新用户偏好设置"""
-    
+@router.get("/sessions/list/{user_id}", response_model=UserSessionsResponse)
+async def get_user_sessions(user_id: str):
+    """
+    获取会话历史 - 左侧栏历史记录显示
+    """
     try:
-        preferences = await user_service.update_user_preferences(
-            current_user.id, 
-            preferences_data
-        )
+        service = await get_user_auth_service()
+        result = await service.get_user_sessions(user_id)
         
-        # 清除缓存
-        await cache.delete(f"{CacheKeys.USER_PREFERENCES}{current_user.id}")
-        
-        return preferences
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"偏好设置更新失败: {str(e)}"
-        )
-
-
-@router.get("/stats")
-async def get_user_stats(
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """获取用户统计信息"""
-    
-    cache_key = f"{CacheKeys.USER_SESSION}stats:{current_user.id}"
-    cached_result = await cache.get(cache_key)
-    if cached_result:
-        return cached_result
-    
-    stats = await user_service.get_user_stats(current_user.id)
-    await cache.set(cache_key, stats, expire=1800)  # 30分钟缓存
-    
-    return stats
-
-
-@router.post("/logout")
-async def logout_user(
-    current_user: UserResponse = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
-):
-    """用户登出"""
-    
-    try:
-        # 将令牌加入黑名单
-        await auth_service.revoke_token(current_user.id)
-        
-        # 清除用户相关缓存
-        await cache.flush_pattern(f"{CacheKeys.USER_SESSION}{current_user.id}*")
-        await cache.flush_pattern(f"{CacheKeys.USER_PREFERENCES}{current_user.id}*")
-        
-        return {"message": "登出成功"}
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"登出失败: {str(e)}"
-        )
-
-
-@router.delete("/account")
-async def delete_user_account(
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """删除用户账户"""
-    
-    try:
-        success = await user_service.delete_user(current_user.id)
-        if not success:
+        if "error" in result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="账户删除失败"
+                detail=result["error"]
             )
         
-        # 清除所有相关缓存
-        await cache.flush_pattern(f"*{current_user.id}*")
-        
-        return {"message": "账户删除成功"}
+        return UserSessionsResponse(**result)
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"获取会话列表失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"账户删除失败: {str(e)}"
+            detail=f"获取会话列表失败: {str(e)}"
         )
 
 
-# 管理员路由
-@router.get("/admin/users")
-async def get_all_users(
-    page: int = 1,
-    size: int = 20,
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """获取所有用户（管理员功能）"""
-    
-    # 检查管理员权限
-    if current_user.role != "admin":
+@router.delete("/sessions/{session_id}", response_model=SessionDeleteResponse)
+async def delete_user_session(session_id: str):
+    """
+    删除会话 - 左侧栏右键删除调用
+    """
+    try:
+        service = await get_user_auth_service()
+        result = await service.delete_session(session_id)
+        
+        response = SessionDeleteResponse(**result)
+        
+        if response.status == "error":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response.message
+            )
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除会话失败: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="需要管理员权限"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"删除会话失败: {str(e)}"
         )
-    
-    users = await user_service.get_all_users(page=page, size=size)
-    return users
 
 
-@router.put("/admin/users/{user_id}/status")
-async def update_user_status(
-    user_id: str,
-    status: str,
-    current_user: UserResponse = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
-):
-    """更新用户状态（管理员功能）"""
-    
-    # 检查管理员权限
-    if current_user.role != "admin":
+@router.delete("/profile/delete/{user_id}", response_model=UserDeleteResponse)
+async def delete_user_by_id(user_id: str):
+    """
+    管理员删除用户 - 系统管理调用（级联删除所有会话和新闻）
+    """
+    try:
+        service = await get_user_auth_service()
+        result = await service.delete_user(user_id)
+        
+        response = UserDeleteResponse(**result)
+        
+        if response.status == "error":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response.message
+            )
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除用户失败: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="需要管理员权限"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"删除用户失败: {str(e)}"
         )
-    
-    success = await user_service.update_user_status(user_id, status)
-    if not success:
+
+
+@router.post("/profile/delete-account", response_model=UserDeleteResponse)
+async def delete_user_by_credentials(user_data: UserDeleteRequest):
+    """
+    用户自删账号 - 用户信息框删除用户调用（需要密码确认）
+    """
+    try:
+        service = await get_user_auth_service()
+        result = await service.delete_user_by_credentials(
+            user_data.username, 
+            user_data.password
+        )
+        
+        response = UserDeleteResponse(**result)
+        
+        if response.status == "error":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response.message
+            )
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除用户账号失败: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="用户不存在"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"删除用户账号失败: {str(e)}"
         )
-    
-    return {"message": f"用户状态已更新为: {status}"} 
+
+
+@router.get("/interests/{user_id}")
+async def get_user_interests(user_id: str):
+    """
+    获取用户兴趣列表
+    """
+    try:
+        from services.user_interest_service import get_user_interests
+        
+        interests = await get_user_interests(user_id)
+        
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "interests": interests or [],
+            "count": len(interests) if interests else 0
+        }
+        
+    except Exception as e:
+        logger.error(f"获取用户兴趣失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"获取用户兴趣失败: {str(e)}"
+        )

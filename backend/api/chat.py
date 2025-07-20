@@ -32,69 +32,59 @@ async def send_message(
         # 如果是新会话，创建会话
         session_id = message_data.session_id
         if not session_id:
-            session = await chat_service.create_session(
+            session = await chat_service.create_chat_session(
                 ChatSessionCreate(title="新对话")
             )
             session_id = session.id
         
-        # 保存用户消息
-        user_message = await chat_service.add_message(
-            session_id=session_id,
-            role="user",
-            content=message_data.content,
-            message_type=message_data.message_type
-        )
+        # 发送消息并获取回复
+        result = await chat_service.send_message(message_data)
         
-        # 获取会话历史（用于上下文）
-        chat_history = await chat_service.get_session_messages(session_id, limit=10)
-        
-        # 使用 QWEN 生成回复
-        qwen_response = await qwen_service.generate_response(
-            user_message=message_data.content,
-            chat_history=chat_history,
-            include_news=message_data.include_news,
-            news_limit=message_data.news_limit,
-            temperature=message_data.temperature,
-            max_tokens=message_data.max_tokens
-        )
-        
-        # 保存 AI 回复
-        ai_message = await chat_service.add_message(
-            session_id=session_id,
-            role="assistant", 
-            content=qwen_response.content,
-            message_type="text",
-            model_name="qwen",
-            tokens_used=qwen_response.tokens_used,
-            generation_time=qwen_response.generation_time,
-            news_ids=qwen_response.news_ids
-        )
-        
-        # 更新会话信息
-        await chat_service.update_session_stats(
-            session_id, 
-            tokens_used=qwen_response.tokens_used
-        )
-        
-        # 获取完整的会话信息
-        session = await chat_service.get_session(session_id)
+        # 构建响应
+        session = await chat_service.get_chat_session(session_id)
         messages = await chat_service.get_session_messages(session_id)
         
         response_time = time.time() - start_time
-        
-        # 异步更新搜索历史和用户偏好
-        if message_data.include_news and qwen_response.news_ids:
-            background_tasks.add_task(
-                chat_service.update_user_preferences_from_chat,
-                session_id,
-                qwen_response.news_ids
-            )
         
         return ChatResponse(
             session=session,
             messages=messages,
             response_time=response_time,
-            tokens_used=qwen_response.tokens_used
+            tokens_used=result.get("tokens_used", 0)
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"聊天服务错误: {str(e)}")
+
+
+@router.post("/message", response_model=ChatResponse)
+async def send_message_compat(
+    message_data: ChatMessageCreate,
+    background_tasks: BackgroundTasks,
+    chat_service: ChatService = Depends(get_chat_service),
+    qwen_service: QWENService = Depends(get_qwen_service)
+):
+    """发送聊天消息并获取 QWEN 回复（兼容路由）"""
+    start_time = time.time()
+    
+    try:
+        # 发送消息并获取回复
+        result = await chat_service.send_message(message_data)
+        
+        # 获取会话ID
+        session_id = result["session"].id
+        
+        # 构建响应
+        session = result["session"]
+        messages = await chat_service.get_session_messages(session_id)
+        
+        response_time = time.time() - start_time
+        
+        return ChatResponse(
+            session=session,
+            messages=messages,
+            response_time=response_time,
+            tokens_used=result.get("tokens_used", 0)
         )
         
     except Exception as e:
@@ -115,14 +105,22 @@ async def get_chat_sessions(
     if cached_result:
         return cached_result
     
-    result = await chat_service.get_user_sessions(
+    result = await chat_service.get_chat_sessions(
         user_id=user_id,
         page=page,
         size=size
     )
     
-    await cache.set(cache_key, result.dict(), expire=300)  # 5分钟缓存
-    return result
+    # 构建ChatHistory响应
+    chat_history = ChatHistory(
+        sessions=result["sessions"],
+        total=result["total"],
+        page=result["page"],
+        size=result["size"]
+    )
+    
+    await cache.set(cache_key, chat_history.dict(), expire=300)  # 5分钟缓存
+    return chat_history
 
 
 @router.get("/sessions/{session_id}", response_model=ChatSession)
@@ -132,7 +130,7 @@ async def get_chat_session(
 ):
     """获取特定聊天会话"""
     
-    session = await chat_service.get_session(session_id)
+    session = await chat_service.get_chat_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="会话不存在")
     
@@ -170,7 +168,7 @@ async def create_chat_session(
 ):
     """创建新的聊天会话"""
     
-    session = await chat_service.create_session(session_data)
+    session = await chat_service.create_chat_session(session_data)
     
     # 清除会话列表缓存
     await cache.flush_pattern(f"{CacheKeys.CHAT_HISTORY}*")
@@ -186,7 +184,7 @@ async def update_chat_session(
 ):
     """更新聊天会话"""
     
-    session = await chat_service.update_session(session_id, session_data)
+    session = await chat_service.update_chat_session(session_id, session_data)
     if not session:
         raise HTTPException(status_code=404, detail="会话不存在")
     
@@ -203,7 +201,7 @@ async def delete_chat_session(
 ):
     """删除聊天会话"""
     
-    success = await chat_service.delete_session(session_id)
+    success = await chat_service.delete_chat_session(session_id)
     if not success:
         raise HTTPException(status_code=404, detail="会话不存在")
     
@@ -222,17 +220,13 @@ async def add_message_reaction(
 ):
     """为消息添加反应（点赞/点踩等）"""
     
-    reaction = MessageReaction(
+    reaction = await chat_service.add_message_reaction(
         message_id=message_id,
-        user_id=user_id,
-        reaction_type=reaction_type
+        reaction_type=reaction_type,
+        user_id=user_id
     )
     
-    success = await chat_service.add_message_reaction(reaction)
-    if not success:
-        raise HTTPException(status_code=404, detail="消息不存在")
-    
-    return {"message": "反应添加成功"}
+    return {"message": "反应添加成功", "reaction_id": reaction.message_id}
 
 
 @router.post("/sessions/{session_id}/regenerate")
@@ -293,4 +287,4 @@ async def get_qwen_model_status(
     """获取 QWEN 模型状态"""
     
     status = await qwen_service.get_model_status()
-    return status 
+    return status

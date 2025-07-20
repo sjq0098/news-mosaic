@@ -102,11 +102,18 @@ class NewsService:
         if "news_results" in data:
             for idx, item in enumerate(data["news_results"]):
                 try:
+                    # 处理source字段，可能是字符串或字典
+                    source_data = item.get("source", "")
+                    if isinstance(source_data, dict):
+                        source = source_data.get("name", "")
+                    else:
+                        source = str(source_data)
+                    
                     article = NewsArticle(
                         title=item.get("title", ""),
                         snippet=item.get("snippet", ""),
                         link=item.get("link", ""),
-                        source=item.get("source", ""),
+                        source=source,
                         date=item.get("date", ""),
                         thumbnail=item.get("thumbnail"),
                         position=idx + 1
@@ -218,4 +225,4 @@ news_service = NewsService()
 
 async def get_news_service() -> NewsService:
     """获取新闻服务实例"""
-    return news_service 
+    return news_service
