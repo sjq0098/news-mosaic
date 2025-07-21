@@ -18,14 +18,15 @@ import {
   Slider,
   Select
 } from 'antd'
-import { 
-  SearchOutlined, 
-  RobotOutlined, 
-  HeartOutlined, 
+import {
+  SearchOutlined,
+  RobotOutlined,
+  HeartOutlined,
   FileTextOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  MessageOutlined
 } from '@ant-design/icons'
 import { newsPipelineApi, enhancedChatApi } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -192,37 +193,71 @@ const UnifiedNewsProcessor: React.FC = () => {
     )
   }
 
+  const renderStructuredSummary = (summary: string) => {
+    // 尝试将AI摘要结构化展示
+    const sections = summary.split('\n\n').filter(section => section.trim())
+
+    return (
+      <div className="structured-summary">
+        {sections.map((section, index) => {
+          const lines = section.split('\n').filter(line => line.trim())
+          if (lines.length === 0) return null
+
+          const isTitle = lines[0].includes('：') || lines[0].includes(':') || lines[0].length < 20
+
+          return (
+            <div key={index} className="summary-section">
+              {isTitle && lines.length > 1 ? (
+                <>
+                  <h4 className="summary-section-title">{lines[0]}</h4>
+                  <div className="summary-section-content">
+                    {lines.slice(1).map((line, lineIndex) => (
+                      <p key={lineIndex} className="summary-line">{line}</p>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="summary-section-content">
+                  {lines.map((line, lineIndex) => (
+                    <p key={lineIndex} className="summary-line">{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   const renderSentimentOverview = () => {
     if (!result?.sentiment_overview) return null
 
     const { sentiment_overview } = result
     return (
-      <Row gutter={16}>
-        <Col span={8}>
-          <Statistic
-            title="正面情感"
-            value={sentiment_overview.positive?.percentage || 0}
-            suffix="%"
-            valueStyle={{ color: '#3f8600' }}
-          />
-        </Col>
-        <Col span={8}>
-          <Statistic
-            title="中性情感"
-            value={sentiment_overview.neutral?.percentage || 0}
-            suffix="%"
-            valueStyle={{ color: '#666' }}
-          />
-        </Col>
-        <Col span={8}>
-          <Statistic
-            title="负面情感"
-            value={sentiment_overview.negative?.percentage || 0}
-            suffix="%"
-            valueStyle={{ color: '#cf1322' }}
-          />
-        </Col>
-      </Row>
+      <div className="sentiment-stats">
+        <div className="sentiment-stat positive">
+          <div className="sentiment-icon">😊</div>
+          <div className="sentiment-info">
+            <div className="sentiment-percentage">{sentiment_overview.positive?.percentage || 0}%</div>
+            <div className="sentiment-label">正面情感</div>
+          </div>
+        </div>
+        <div className="sentiment-stat neutral">
+          <div className="sentiment-icon">😐</div>
+          <div className="sentiment-info">
+            <div className="sentiment-percentage">{sentiment_overview.neutral?.percentage || 0}%</div>
+            <div className="sentiment-label">中性情感</div>
+          </div>
+        </div>
+        <div className="sentiment-stat negative">
+          <div className="sentiment-icon">😞</div>
+          <div className="sentiment-info">
+            <div className="sentiment-percentage">{sentiment_overview.negative?.percentage || 0}%</div>
+            <div className="sentiment-label">负面情感</div>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -230,23 +265,47 @@ const UnifiedNewsProcessor: React.FC = () => {
     if (!result?.news_cards?.length) return null
 
     return (
-      <Row gutter={[16, 16]}>
+      <Row gutter={[24, 24]} className="news-cards-grid">
         {result.news_cards.map((card, index) => (
-          <Col span={24} key={index}>
-            <Card
-              size="small"
-              title={card.title}
-              extra={<Tag color="blue">{card.source}</Tag>}
-            >
-              <p>{card.metadata?.summary}</p>
-              <Space>
-                <Tag color={card.metadata?.sentiment_label === 'positive' ? 'green' : 
-                           card.metadata?.sentiment_label === 'negative' ? 'red' : 'default'}>
-                  {card.metadata?.sentiment_label || '中性'}
-                </Tag>
-                <Tag>重要性: {card.display_priority}/10</Tag>
-              </Space>
-            </Card>
+          <Col xs={24} sm={24} md={12} lg={8} key={index}>
+            <div className="news-card">
+              <div className="news-card-header">
+                <div className="sentiment-indicator">
+                  <div className={`sentiment-dot sentiment-${card.metadata?.sentiment_label || 'neutral'}`}></div>
+                </div>
+                <div className="news-card-meta">
+                  <span className="news-source">{card.source}</span>
+                  <span className="news-date">{new Date(card.published_at).toLocaleDateString('zh-CN')}</span>
+                </div>
+              </div>
+
+              <div className="news-card-content">
+                <h3 className="news-card-title">{card.title}</h3>
+                <p className="news-card-summary">{card.metadata?.summary}</p>
+
+                <div className="news-card-tags">
+                  <span className={`sentiment-tag sentiment-${card.metadata?.sentiment_label || 'neutral'}`}>
+                    {card.metadata?.sentiment_label === 'positive' ? '😊 正面' :
+                     card.metadata?.sentiment_label === 'negative' ? '😞 负面' : '😐 中性'}
+                  </span>
+                  <span className="importance-tag">
+                    ⭐ 重要性 {card.display_priority}/10
+                  </span>
+                </div>
+              </div>
+
+              <div className="news-card-footer">
+                <Button
+                  type="link"
+                  href={card.url}
+                  target="_blank"
+                  className="read-more-button"
+                  icon={<FileTextOutlined />}
+                >
+                  阅读原文
+                </Button>
+              </div>
+            </div>
           </Col>
         ))}
       </Row>
@@ -254,87 +313,148 @@ const UnifiedNewsProcessor: React.FC = () => {
   }
 
   const renderChatInterface = () => (
-    <div style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', border: '1px solid #d9d9d9', borderRadius: '6px' }}>
-        {chatMessages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: '16px' }}>
-            <div style={{ 
-              background: msg.role === 'user' ? '#1890ff' : '#f0f0f0',
-              color: msg.role === 'user' ? 'white' : 'black',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              maxWidth: '80%',
-              marginLeft: msg.role === 'user' ? 'auto' : '0',
-              marginRight: msg.role === 'user' ? '0' : 'auto'
-            }}>
-              {msg.content}
-              {msg.confidence_score && (
-                <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.8 }}>
-                  置信度: {(msg.confidence_score * 100).toFixed(1)}% | 来源: {msg.sources_count}条新闻
-                </div>
-              )}
+    <div className="chat-interface">
+      <div className="chat-messages">
+        {chatMessages.length === 0 ? (
+          <div className="chat-empty-state">
+            <div className="chat-empty-icon">💬</div>
+            <h4 className="chat-empty-title">开始智能对话</h4>
+            <p className="chat-empty-description">
+              您可以询问有关这些新闻的任何问题，例如：
+            </p>
+            <div className="chat-suggestions">
+              <Button
+                className="chat-suggestion"
+                type="text"
+                onClick={() => handleChatWithNews("这些新闻中最重要的事件是什么？")}
+              >
+                这些新闻中最重要的事件是什么？
+              </Button>
+              <Button
+                className="chat-suggestion"
+                type="text"
+                onClick={() => handleChatWithNews("总结一下正面和负面的观点")}
+              >
+                总结一下正面和负面的观点
+              </Button>
+              <Button
+                className="chat-suggestion"
+                type="text"
+                onClick={() => handleChatWithNews("这些新闻反映了什么趋势？")}
+              >
+                这些新闻反映了什么趋势？
+              </Button>
             </div>
           </div>
-        ))}
-        {chatLoading && (
-          <div style={{ textAlign: 'center' }}>
-            <Spin size="small" /> AI正在思考...
-          </div>
+        ) : (
+          <>
+            {chatMessages.map((msg, index) => (
+              <div key={index} className={`chat-message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
+                <div className="message-avatar">
+                  {msg.role === 'user' ? '👤' : '🤖'}
+                </div>
+                <div className="message-content">
+                  <div className="message-text">{msg.content}</div>
+                  {msg.confidence_score && (
+                    <div className="message-meta">
+                      <span className="confidence-score">
+                        <CheckCircleOutlined /> 置信度: {(msg.confidence_score * 100).toFixed(1)}%
+                      </span>
+                      <span className="sources-count">
+                        <FileTextOutlined /> 来源: {msg.sources_count}条新闻
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div className="chat-loading">
+                <Spin size="small" />
+                <span>AI正在思考...</span>
+              </div>
+            )}
+          </>
         )}
       </div>
-      <div style={{ marginTop: '16px' }}>
+      <div className="chat-input">
         <Search
-          placeholder="询问关于新闻的问题..."
-          enterButton="发送"
+          placeholder="询问关于这些新闻的问题..."
+          enterButton={
+            <Button type="primary" loading={chatLoading}>
+              发送
+            </Button>
+          }
           size="large"
           onSearch={handleChatWithNews}
-          loading={chatLoading}
+          disabled={chatLoading}
+          className="chat-search-input"
         />
+        <div className="chat-input-hint">
+          提示：您可以询问特定事件、观点分析、趋势预测等
+        </div>
       </div>
     </div>
   )
 
   return (
     <div style={{ padding: '24px' }}>
-      <Card title="统一新闻处理系统" style={{ marginBottom: '24px' }}>
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
-          {/* 搜索区域 */}
-          <div>
-            <Search
-              placeholder="输入新闻搜索关键词..."
-              enterButton={
-                <Button type="primary" icon={<SearchOutlined />} loading={loading}>
-                  智能处理
-                </Button>
-              }
-              size="large"
-              onSearch={handleNewsProcessing}
-              disabled={loading}
-            />
+      <div className="search-container">
+        <div className="search-header">
+          <h2 className="search-title">探索新闻洞察</h2>
+          <p className="search-subtitle">输入关键词，发现最新新闻动态与深度分析</p>
+        </div>
+        <div className="search-box-container">
+          <Search
+            placeholder="输入感兴趣的话题，例如：南开大学、人工智能、气候变化..."
+            enterButton={
+              <Button type="primary" icon={<SearchOutlined />} loading={loading} className="search-button">
+                智能分析
+              </Button>
+            }
+            size="large"
+            onSearch={handleNewsProcessing}
+            disabled={loading}
+            className="main-search-box"
+          />
+          <div className="search-options">
+            <Select
+              size="small"
+              value={config.num_results}
+              onChange={(value) => setConfig(prev => ({ ...prev, num_results: value }))}
+              className="search-option-select"
+            >
+              <Option value={10}>10 条结果</Option>
+              <Option value={20}>20 条结果</Option>
+              <Option value={50}>50 条结果</Option>
+              <Option value={100}>100 条结果</Option>
+            </Select>
+            <Select
+              size="small"
+              value={config.max_cards}
+              onChange={(value) => setConfig(prev => ({ ...prev, max_cards: value }))}
+              className="search-option-select"
+            >
+              <Option value={3}>3 张卡片</Option>
+              <Option value={5}>5 张卡片</Option>
+              <Option value={10}>10 张卡片</Option>
+            </Select>
+            <Button
+              size="small"
+              type="text"
+              onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}
+              className="advanced-settings-button"
+            >
+              高级设置
+            </Button>
           </div>
+        </div>
 
-          {/* 配置选项 */}
-          <Card title="处理配置" size="small">
+        {/* 高级设置模态框 - 默认隐藏 */}
+        <div id="advanced-settings-modal" className="advanced-settings-modal">
+          <Card title="高级处理设置" size="small" extra={<Button type="text" onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}>关闭</Button>}>
             <Row gutter={16}>
-              <Col span={6}>
-                <div>结果数量: {config.num_results}</div>
-                <Slider
-                  min={5}
-                  max={50}
-                  value={config.num_results}
-                  onChange={(value) => setConfig(prev => ({ ...prev, num_results: value }))}
-                />
-              </Col>
-              <Col span={6}>
-                <div>最大卡片: {config.max_cards}</div>
-                <Slider
-                  min={1}
-                  max={20}
-                  value={config.max_cards}
-                  onChange={(value) => setConfig(prev => ({ ...prev, max_cards: value }))}
-                />
-              </Col>
-              <Col span={12}>
+              <Col span={24}>
                 <Space wrap>
                   <span>存储: <Switch size="small" checked={config.enable_storage} onChange={(checked) => setConfig(prev => ({ ...prev, enable_storage: checked }))} /></span>
                   <span>向量化: <Switch size="small" checked={config.enable_vectorization} onChange={(checked) => setConfig(prev => ({ ...prev, enable_vectorization: checked }))} /></span>
@@ -344,51 +464,85 @@ const UnifiedNewsProcessor: React.FC = () => {
               </Col>
             </Row>
           </Card>
-        </Space>
-      </Card>
+        </div>
+      </div>
 
       {/* 处理结果 */}
       {result && (
-        <Tabs defaultActiveKey="overview">
-          <TabPane tab={<span><FileTextOutlined />处理概览</span>} key="overview">
-            <Row gutter={16} style={{ marginBottom: '24px' }}>
-              <Col span={6}>
-                <Statistic title="找到新闻" value={result.total_found} />
-              </Col>
-              <Col span={6}>
-                <Statistic title="处理数量" value={result.processed_count} />
-              </Col>
-              <Col span={6}>
-                <Statistic title="生成卡片" value={result.cards_generated} />
-              </Col>
-              <Col span={6}>
-                <Statistic title="处理时间" value={result.processing_time.toFixed(2)} suffix="s" />
-              </Col>
-            </Row>
-            
-            {result.ai_summary && (
-              <Card title="AI分析摘要" style={{ marginBottom: '16px' }}>
-                <p>{result.ai_summary}</p>
-              </Card>
-            )}
-          </TabPane>
+        <div className="results-container">
+          {/* 处理概览 - 重新设计为更有意义的展示 */}
+          <div className="processing-overview">
+            <div className="overview-stats">
+              <div className="stat-item">
+                <div className="stat-icon">📰</div>
+                <div className="stat-content">
+                  <div className="stat-value">{result.total_found}</div>
+                  <div className="stat-label">篇相关新闻</div>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">🎯</div>
+                <div className="stat-content">
+                  <div className="stat-value">{result.cards_generated}</div>
+                  <div className="stat-label">张核心事件卡片</div>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">⚡</div>
+                <div className="stat-content">
+                  <div className="stat-value">{result.processing_time.toFixed(1)}s</div>
+                  <div className="stat-label">处理完成</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <TabPane tab={<span><ClockCircleOutlined />处理流程</span>} key="stages">
-            {renderProcessingStages()}
-          </TabPane>
+          {/* AI分析摘要 - 结构化展示 */}
+          {result.ai_summary && (
+            <div className="ai-analysis-section">
+              <h3 className="section-title">
+                <RobotOutlined className="section-icon" />
+                智能分析洞察
+              </h3>
+              <div className="ai-summary-content">
+                {renderStructuredSummary(result.ai_summary)}
+              </div>
+            </div>
+          )}
 
-          <TabPane tab={<span><HeartOutlined />情感分析</span>} key="sentiment">
-            {renderSentimentOverview()}
-          </TabPane>
+          {/* 情感分析概览 */}
+          {result.sentiment_overview && (
+            <div className="sentiment-section">
+              <h3 className="section-title">
+                <HeartOutlined className="section-icon" />
+                情感倾向分析
+              </h3>
+              <div className="sentiment-overview">
+                {renderSentimentOverview()}
+              </div>
+            </div>
+          )}
 
-          <TabPane tab={<span><FileTextOutlined />新闻卡片</span>} key="cards">
+          {/* 新闻卡片 - 主要展示区域 */}
+          <div className="news-cards-section">
+            <h3 className="section-title">
+              <FileTextOutlined className="section-icon" />
+              核心新闻事件
+            </h3>
             {renderNewsCards()}
-          </TabPane>
+          </div>
 
-          <TabPane tab={<span><RobotOutlined />智能对话</span>} key="chat">
-            {renderChatInterface()}
-          </TabPane>
-        </Tabs>
+          {/* 智能对话区域 */}
+          <div className="chat-section">
+            <h3 className="section-title">
+              <MessageOutlined className="section-icon" />
+              继续深入探讨
+            </h3>
+            <div className="chat-container">
+              {renderChatInterface()}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

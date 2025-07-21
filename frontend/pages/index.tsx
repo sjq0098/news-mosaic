@@ -137,12 +137,12 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
 
   // 获取页面标题
   const getPageTitle = () => {
-    return '统一新闻处理系统'
+    return '智能新闻分析'
   }
 
   // 获取页面描述
   const getPageDescription = () => {
-    return '一站式新闻处理：搜索→存储→向量化→AI分析→卡片生成→智能对话'
+    return '发现新闻洞察，探索深度分析'
   }
 
   // 如果正在加载认证状态，显示加载页面
