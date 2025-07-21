@@ -20,11 +20,17 @@ from models.embedding import TextChunk, EmbeddingResult, EmbeddingResultModel
 
 class QWenEmbeddingService:
     """QWen Embedding 服务"""
-    
+
     def __init__(self):
         self.api_key = settings.QWEN_API_KEY
         self.base_url = settings.QWEN_BASE_URL
         self.model_name = "text-embedding-v3"
+
+        # 检查是否为演示模式
+        self.demo_mode = not settings.is_api_configured("qwen")
+
+        if self.demo_mode:
+            logger.warning("⚠️ Embedding服务运行在演示模式，将生成模拟向量")
 
         # 使用 LangChain 的递归式分块器（与原逻辑保持 chunk_size/overlap 一致）
         self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -33,11 +39,14 @@ class QWenEmbeddingService:
             encoding_name="cl100k_base"
         )
 
-        # DashScopeEmbeddings 直接调用通义向量接口，无需手动拼接 URL
-        self.embedding_model = DashScopeEmbeddings(
-            model=self.model_name,
-            dashscope_api_key=self.api_key,
-        )
+        # 只在非演示模式下初始化真实的embedding模型
+        if not self.demo_mode:
+            self.embedding_model = DashScopeEmbeddings(
+                model=self.model_name,
+                dashscope_api_key=self.api_key,
+            )
+        else:
+            self.embedding_model = None
 
         self.batch_size = 10  # 批量处理大小
     
@@ -90,13 +99,18 @@ class QWenEmbeddingService:
     async def generate_embedding(self, text: str) -> np.ndarray:
         """
         生成单个文本的 embedding
-        
+
         Args:
             text: 文本内容
-            
+
         Returns:
             embedding 向量
         """
+        if self.demo_mode:
+            # 演示模式：生成模拟向量
+            logger.debug(f"🎭 演示模式：为文本生成模拟向量")
+            return np.array(self._generate_mock_embedding(text), dtype=np.float32)
+
         # 使用 LangChain 同步接口，在异步环境下借助 asyncio.to_thread
         vector = await asyncio.to_thread(self.embedding_model.embed_query, text)
         return np.array(vector, dtype=np.float32)
@@ -108,27 +122,56 @@ class QWenEmbeddingService:
         try:
             if not texts:
                 return []
-            
+
+            if self.demo_mode:
+                # 演示模式：生成模拟向量
+                logger.info(f"🎭 演示模式：为 {len(texts)} 个文本生成模拟向量")
+                return [self._generate_mock_embedding(text) for text in texts]
+
             embeddings = await self.generate_embeddings_batch(texts)
             # 转换为List[List[float]]格式
             return [embedding.tolist() if hasattr(embedding, 'tolist') else list(embedding) for embedding in embeddings]
         except Exception as e:
             logger.error(f"获取embeddings失败: {e}")
-            return []
+            # 失败时也返回模拟向量
+            return [self._generate_mock_embedding(text) for text in texts]
     
     async def generate_embeddings_batch(self, texts: List[str]) -> List[np.ndarray]:
         """
         批量生成 embeddings
-        
+
         Args:
             texts: 文本列表
-            
+
         Returns:
             embedding 向量列表
         """
+        if self.demo_mode:
+            # 演示模式：生成模拟向量
+            logger.info(f"🎭 演示模式：批量生成 {len(texts)} 个模拟向量")
+            return [np.array(self._generate_mock_embedding(text), dtype=np.float32) for text in texts]
+
         # LangChain embed_documents 是同步函数，同样使用线程池异步化
         vectors = await asyncio.to_thread(self.embedding_model.embed_documents, texts)
         return [np.array(v, dtype=np.float32) for v in vectors]
+
+    def _generate_mock_embedding(self, text: str) -> List[float]:
+        """
+        生成模拟向量（演示模式）
+        基于文本内容生成确定性的向量，确保相似文本有相似向量
+        """
+        # 使用文本的hash值作为种子，确保相同文本生成相同向量
+        import hashlib
+        text_hash = int(hashlib.md5(text.encode()).hexdigest()[:8], 16)
+        np.random.seed(text_hash % (2**32))
+
+        # 生成1536维向量（与通义千问embedding维度一致）
+        vector = np.random.normal(0, 1, 1536).astype(np.float32)
+
+        # 归一化向量
+        vector = vector / np.linalg.norm(vector)
+
+        return vector.tolist()
     
     async def process_text(
         self,

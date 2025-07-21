@@ -28,6 +28,7 @@ import {
   ExclamationCircleOutlined
 } from '@ant-design/icons'
 import { newsPipelineApi, enhancedChatApi } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 const { Search } = Input
 const { TabPane } = Tabs
@@ -63,6 +64,7 @@ interface NewsProcessingResult {
 }
 
 const UnifiedNewsProcessor: React.FC = () => {
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<NewsProcessingResult | null>(null)
   const [chatLoading, setChatLoading] = useState(false)
@@ -73,11 +75,11 @@ const UnifiedNewsProcessor: React.FC = () => {
   const [config, setConfig] = useState({
     num_results: 10,
     enable_storage: true,
-    enable_vectorization: false, // 默认关闭向量化（耗时）
+    enable_vectorization: true, // 启用向量化以支持智能对话
     enable_ai_analysis: true,
     enable_card_generation: true,
     enable_sentiment_analysis: true,
-    enable_user_memory: false, // 默认关闭用户记忆（耗时）
+    enable_user_memory: true, // 启用用户记忆以支持个性化对话
     max_cards: 5,
     personalization_level: 0.5
   })
@@ -118,7 +120,7 @@ const UnifiedNewsProcessor: React.FC = () => {
     setChatLoading(true)
     try {
       const response = await enhancedChatApi.chatWithRAG({
-        user_id: 'anonymous', // 添加必需的user_id参数
+        user_id: user?.id || user?.username || 'anonymous',
         message: userMessage,
         session_id: currentSessionId,
         max_context_news: 5,
@@ -173,15 +175,15 @@ const UnifiedNewsProcessor: React.FC = () => {
           <Timeline.Item
             key={index}
             color={stage.success ? 'green' : 'red'}
-            icon={stage.success ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
+            dot={stage.success ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
           >
             <div>
-              <strong>{stageNames[stage.stage] || stage.stage}</strong>
+              <strong>{stageNames[stage.stage as keyof typeof stageNames] || stage.stage}</strong>
               <div style={{ fontSize: '12px', color: '#666' }}>
                 耗时: {stage.processing_time.toFixed(2)}s
               </div>
               {stage.error && (
-                <Alert message={stage.error} type="error" size="small" style={{ marginTop: 4 }} />
+                <Alert message={stage.error} type="error" style={{ marginTop: 4 }} />
               )}
             </div>
           </Timeline.Item>

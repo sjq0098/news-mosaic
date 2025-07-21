@@ -360,8 +360,12 @@ class NewsProcessingPipeline:
 
         for news in limited_news_list:
             try:
+                news_id = news.get('_id', 'unknown')
+                logger.info(f"开始向量化新闻: {news_id}")
+
                 # 准备文本内容
                 text_content = f"{news['title']}\n{news.get('content', '')}"
+                logger.info(f"文本内容长度: {len(text_content)}")
 
                 # 创建文本块
                 chunk = TextChunk(
@@ -377,7 +381,10 @@ class NewsProcessingPipeline:
                 )
 
                 # 生成嵌入向量
+                logger.info(f"正在生成向量...")
                 embedding = await self.embedding_service.get_embeddings([text_content])
+                logger.info(f"向量生成结果: {len(embedding) if embedding else 0} 个向量")
+
                 if embedding and len(embedding) > 0:
                     embedding_result = EmbeddingResult(
                         chunk=chunk,
@@ -386,11 +393,17 @@ class NewsProcessingPipeline:
                     )
 
                     # 存储到向量数据库
+                    logger.info(f"正在存储向量到数据库...")
                     self.vector_db.upsert_embeddings([embedding_result])
                     vectors_created += 1
+                    logger.info(f"✅ 成功向量化新闻: {news_id}")
+                else:
+                    logger.warning(f"❌ 新闻 {news_id} 向量生成失败：返回空向量")
 
             except Exception as e:
-                logger.error(f"向量化新闻失败 {news.get('_id', 'unknown')}: {e}")
+                logger.error(f"❌ 向量化新闻失败 {news.get('_id', 'unknown')}: {e}")
+                import traceback
+                logger.error(f"详细错误信息: {traceback.format_exc()}")
                 continue
 
         logger.info(f"成功创建 {vectors_created} 个向量")

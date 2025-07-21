@@ -225,7 +225,9 @@ class EnhancedRAGChatService:
                     if news_id:
                         news = await self.db[Collections.NEWS].find_one({"_id": news_id})
                         if news:
-                            news["similarity_score"] = result.get("score", 0)
+                            # 确保similarity_score是Python原生float类型
+                            score = result.get("score", 0)
+                            news["similarity_score"] = float(score) if score is not None else 0.0
                             news_list.append(news)
 
                 if news_list:
@@ -248,7 +250,7 @@ class EnhancedRAGChatService:
 
             news_list = []
             async for news in cursor:
-                news["similarity_score"] = 0.8  # 默认相似度
+                news["similarity_score"] = 0.8  # 默认相似度（已经是float）
                 news_list.append(news)
 
             return news_list
@@ -453,7 +455,7 @@ class EnhancedRAGChatService:
                         # 结合原始相似度分数和兴趣分数
                         original_score = result.get("score", 0)
                         personalized_score = original_score * 0.7 + (interest_score / 100) * 0.3
-                        result["score"] = personalized_score
+                        result["score"] = float(personalized_score)  # 确保是Python原生float
 
             # 重新排序
             results.sort(key=lambda x: x.get("score", 0), reverse=True)
@@ -558,7 +560,7 @@ class EnhancedRAGChatService:
             "url": news.get("url"),
             "source": news.get("source"),
             "published_at": news.get("published_at"),
-            "similarity_score": news.get("similarity_score", 0)
+            "similarity_score": float(news.get("similarity_score", 0))
         }
 
     async def _generate_context_summary(self, relevant_news: List[Dict[str, Any]]) -> Optional[str]:

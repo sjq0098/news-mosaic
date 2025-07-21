@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Spin, Result, Button } from 'antd'
 import { LoadingOutlined, LockOutlined } from '@ant-design/icons'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../contexts/AuthContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

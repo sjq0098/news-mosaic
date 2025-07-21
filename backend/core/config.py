@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # API 服务配置
     HOST: str = Field(default="0.0.0.0", description="服务地址")
     PORT: int = Field(default=8000, description="服务端口")
-    CORS_ORIGINS: str = Field(default="http://localhost:3000,http://127.0.0.1:3000", description="CORS 允许的源")
+    CORS_ORIGINS: str = Field(default="http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://localhost:3002,http://localhost:3005", description="CORS 允许的源")
     ALLOWED_HOSTS: str = Field(default="localhost,127.0.0.1", description="允许的主机")
     
     # LLM API 配置

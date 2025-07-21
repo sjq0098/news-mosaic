@@ -20,8 +20,8 @@ import {
   UserOutlined,
   ReloadOutlined
 } from '@ant-design/icons'
-import { useAuth } from './AuthContext'
-import { userApi, newsApi } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
+import { userApi, newsPipelineApi } from '../services/api'
 
 interface NewsItem {
   id: string
@@ -66,16 +66,20 @@ const PersonalizedNews: React.FC<PersonalizedNewsProps> = ({
       const queryResponse = await userApi.getUserPersonalizationQuery()
       const queryParams = queryResponse.data.data
 
-      // 使用个性化参数搜索新闻
-      const newsResponse = await newsApi.searchNews({
-        query: queryParams.keywords?.join(' ') || '',
-        categories: queryParams.categories,
-        sources: queryParams.sources,
-        limit: limit
+      // 使用新闻处理流水线搜索新闻
+      const newsResponse = await newsPipelineApi.processNews({
+        query: queryParams.keywords?.join(' ') || '个性化新闻',
+        num_results: limit,
+        enable_storage: false,
+        enable_vectorization: false,
+        enable_ai_analysis: false,
+        enable_card_generation: false,
+        enable_sentiment_analysis: false,
+        enable_user_memory: false
       })
 
-      if (newsResponse.data.status === 'success') {
-        setNews(newsResponse.data.data.articles || [])
+      if (newsResponse.data.success) {
+        setNews(newsResponse.data.news_list || [])
       }
     } catch (error: any) {
       console.error('加载个性化新闻失败:', error)

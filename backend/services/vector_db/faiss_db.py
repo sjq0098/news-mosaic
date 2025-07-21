@@ -1,6 +1,8 @@
 """FAISS 本地向量数据库实现（仅用于开发/测试）"""
 
 from typing import List, Dict, Any
+import numpy as np
+from loguru import logger
 
 from langchain_community.vectorstores import FAISS
 from langchain.docstore.document import Document
@@ -10,12 +12,44 @@ from models.embedding import EmbeddingResult
 from services.embedding_service import embedding_service
 
 
+class MockEmbedding:
+    """模拟embedding模型，用于演示模式"""
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """模拟文档embedding"""
+        return [self._generate_mock_vector(text) for text in texts]
+
+    def embed_query(self, text: str) -> List[float]:
+        """模拟查询embedding"""
+        return self._generate_mock_vector(text)
+
+    def __call__(self, text: str) -> List[float]:
+        """使对象可调用，兼容FAISS的embedding_function"""
+        return self.embed_query(text)
+
+    def _generate_mock_vector(self, text: str) -> List[float]:
+        """生成模拟向量"""
+        import hashlib
+        text_hash = int(hashlib.md5(text.encode()).hexdigest()[:8], 16)
+        np.random.seed(text_hash % (2**32))
+        vector = np.random.normal(0, 1, 1536).astype(np.float32)
+        vector = vector / np.linalg.norm(vector)
+        return vector.tolist()
+
+
 class FaissVectorDB(IVectorDB):
     """使用 LangChain-FAISS 在内存中保存向量，适合本地单进程测试。"""
 
     def __init__(self):
-        # 使用同一 embedding_model，保证向量空间一致
-        self._embedding_model = embedding_service.embedding_model
+        # 检查是否为演示模式
+        if embedding_service.demo_mode or embedding_service.embedding_model is None:
+            logger.warning("🎭 FAISS向量数据库运行在演示模式")
+            self._embedding_model = MockEmbedding()
+            self._demo_mode = True
+        else:
+            self._embedding_model = embedding_service.embedding_model
+            self._demo_mode = False
+
         self._vectorstore: FAISS | None = None
 
     # -------------------------------------------------
@@ -23,9 +57,8 @@ class FaissVectorDB(IVectorDB):
     # -------------------------------------------------
     def init_index(self, dimension: int) -> None:
         """FAISS 会在第一次 upsert 时自动创建索引，这里无需额外操作。"""
-        if self._vectorstore is None:
-            # 创建一个空向量库
-            self._vectorstore = FAISS.from_texts([], self._embedding_model)
+        # FAISS向量库将在第一次upsert时自动创建，这里不需要预先初始化
+        pass
 
     def upsert_embeddings(self, results: List[EmbeddingResult]) -> None:
         texts: List[str] = []
@@ -35,8 +68,10 @@ class FaissVectorDB(IVectorDB):
             metadatas.append({
                 "news_id": r.model_info.get("source_id"),
                 "chunk_index": r.chunk.chunk_index,
-                "title": r.chunk.metadata.get("title"),
-                "published_at": r.chunk.metadata.get("published_at"),
+                "title": r.chunk.metadata.title,
+                "published_at": r.chunk.metadata.published_at,
+                "source": r.chunk.metadata.source,
+                "url": r.chunk.metadata.url,
             })
 
         if self._vectorstore is None:

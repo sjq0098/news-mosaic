@@ -23,7 +23,7 @@ import {
   SaveOutlined
 } from '@ant-design/icons'
 import { userApi } from '../services/api'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../contexts/AuthContext'
 
 const { Option } = Select
 const { TextArea } = Input

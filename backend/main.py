@@ -15,9 +15,8 @@ from loguru import logger
 from core.config import settings
 from core.database import init_database, close_database
 from core.cache import init_redis, close_redis
-from api import news, chat, user, sentiment, news_card
+from api import user
 from services.background_tasks import init_celery
-from api.embedding import router as embedding_router
 
 
 @asynccontextmanager
@@ -121,39 +120,20 @@ async def health_check():
     }
 
 
-# 注册路由
-app.include_router(news.router, prefix="/api/news", tags=["新闻"])
-app.include_router(chat.router, prefix="/api/chat", tags=["对话"])
+# 注册核心路由
 app.include_router(user.router, prefix="/api/user", tags=["用户"])
-app.include_router(sentiment.router, prefix="/api/sentiment", tags=["情感分析"])
-app.include_router(embedding_router, prefix="/api/embedding", tags=["embedding"])
-app.include_router(news_card.router, tags=["新闻卡片"])
 
-# 导入并注册统一新闻处理API
-from api.unified_news import router as unified_news_router
-app.include_router(unified_news_router, tags=["统一新闻处理"])
-
-
-
-# 导入并注册Pipeline API
-from api.pipeline import router as pipeline_router
-app.include_router(pipeline_router, tags=["智能分析Pipeline"])
-
-# 导入并注册新闻处理流水线API
+# 导入并注册新闻处理流水线API（核心功能）
 from api.news_pipeline import router as news_pipeline_router
 app.include_router(news_pipeline_router, tags=["新闻处理流水线"])
 
-# 导入并注册增强RAG对话API
+# 导入并注册增强RAG对话API（核心功能）
 from api.enhanced_chat import router as enhanced_chat_router
 app.include_router(enhanced_chat_router, tags=["增强RAG对话"])
 
-# 导入并注册用户记忆管理API
+# 导入并注册用户记忆管理API（核心功能）
 from api.user_memory import router as user_memory_router
 app.include_router(user_memory_router, tags=["用户记忆管理"])
-
-# 导入并注册智能聊天API
-from api.intelligent_chat import router as intelligent_chat_router
-app.include_router(intelligent_chat_router, prefix="/api/v1/intelligent", tags=["智能助手"])
 
 
 if __name__ == "__main__":
