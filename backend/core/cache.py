@@ -2,7 +2,7 @@
 Redis 缓存管理模块
 """
 
-import aioredis
+import redis.asyncio as aioredis
 import json
 from typing import Any, Optional, Union
 from loguru import logger

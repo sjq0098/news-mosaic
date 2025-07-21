@@ -27,7 +27,7 @@ import {
   UserOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { newsApi } from '../services/api'
+import { newsApi, unifiedNewsApi } from '../services/api'
 
 const { Search } = Input
 const { Option } = Select
@@ -64,7 +64,7 @@ export default function NewsSearchSection() {
   const [showFilters, setShowFilters] = useState(false)
   const [total, setTotal] = useState(0)
 
-  // 搜索新闻
+  // 搜索新闻 - 使用统一新闻处理API
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       message.warning('请输入搜索关键词')
@@ -73,21 +73,54 @@ export default function NewsSearchSection() {
 
     setLoading(true)
     try {
-      const response = await newsApi.searchNews({
+      const response = await unifiedNewsApi.processUnified({
         query,
         num_results: 20,
         language: 'zh-cn',
         country: 'cn',
         time_period: '1w',
+        enable_storage: true,
+        enable_analysis: true,
+        enable_cards: true,
+        max_cards: 5,
+        include_sentiment: true,
+        include_summary: true,
         ...filters
       })
 
       if (response.data.success) {
-        setNewsData(response.data.data.articles || [])
-        setTotal(response.data.data.total_results || 0)
-        message.success(`找到 ${response.data.data.total_results} 条相关新闻`)
+        // 转换数据格式以兼容现有组件
+        const articles = response.data.news_articles || []
+        const convertedData = articles.map((article: any, index: number) => ({
+          id: `news_${index}`,
+          title: article.title,
+          summary: article.snippet,
+          content: article.snippet,
+          url: article.link,
+          source: article.source,
+          publishedAt: new Date().toISOString(),
+          sentiment: 'neutral' as const,
+          category: 'general',
+          tags: [],
+          readTime: 3,
+          thumbnail: article.thumbnail
+        }))
+
+        setNewsData(convertedData)
+        setTotal(response.data.total_found || 0)
+
+        // 显示处理结果
+        const { total_found, cards_generated, ai_summary } = response.data
+        message.success(
+          `找到 ${total_found} 条新闻，生成 ${cards_generated} 张卡片${ai_summary ? '，包含AI分析' : ''}`
+        )
+
+        // 如果有AI摘要，可以在这里显示
+        if (ai_summary) {
+          console.log('AI分析摘要:', ai_summary)
+        }
       } else {
-        message.error('搜索失败，请稍后重试')
+        message.error(response.data.message || '搜索失败，请稍后重试')
       }
     } catch (error) {
       console.error('Search error:', error)

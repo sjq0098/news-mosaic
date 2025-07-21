@@ -26,6 +26,8 @@ class EmbeddingModel(BaseModel):
     model_name: str = Field(..., description="模型名称")
     model_version: str = Field(default="", description="模型版本")
 
+    model_config = {"protected_namespaces": ()}
+
 
 class EmbeddingResultModel(BaseModel):
     """Embedding 结果模型"""
@@ -38,15 +40,37 @@ class EmbeddingResultModel(BaseModel):
 
 
 @dataclass
+class ChunkMetadata:
+    """分块元数据"""
+    source_id: str = ""
+    title: str = ""
+    published_at: str = ""
+    url: str = ""
+    source: str = ""
+    category: str = ""
+
+    def to_dict(self) -> dict:
+        """转换为字典"""
+        return {
+            "source_id": self.source_id,
+            "title": self.title,
+            "published_at": self.published_at,
+            "url": self.url,
+            "source": self.source,
+            "category": self.category
+        }
+
+
+@dataclass
 class TextChunk:
     """文本分块数据类（内部处理用）"""
     content: str
     chunk_index: int
-    token_count: int
-    start_pos: int
-    end_pos: int
-    metadata: dict
-    
+    metadata: ChunkMetadata
+    token_count: int = 0
+    start_pos: int = 0
+    end_pos: int = 0
+
     def to_model(self) -> TextChunkModel:
         """转换为 Pydantic 模型"""
         return TextChunkModel(
@@ -55,7 +79,7 @@ class TextChunk:
             token_count=self.token_count,
             start_pos=self.start_pos,
             end_pos=self.end_pos,
-            metadata=self.metadata
+            metadata=self.metadata.to_dict()
         )
 
 
@@ -63,18 +87,24 @@ class TextChunk:
 class EmbeddingResult:
     """Embedding 结果数据类（内部处理用）"""
     chunk: TextChunk
-    embedding: np.ndarray
+    embedding: List[float]  # 改为List[float]以便序列化
     model_info: dict
     processing_time: float = 0.0
-    
-    def to_model(self, chunk_id: str, source_id: str) -> EmbeddingResultModel:
+
+    def to_model(self, chunk_id: str = None, source_id: str = None) -> EmbeddingResultModel:
         """转换为 Pydantic 模型"""
+        # 如果没有提供ID，从chunk的metadata中获取
+        if not chunk_id:
+            chunk_id = f"{self.chunk.metadata.source_id}_{self.chunk.chunk_index}"
+        if not source_id:
+            source_id = self.chunk.metadata.source_id
+
         return EmbeddingResultModel(
             chunk_id=chunk_id,
             source_id=source_id,
             chunk=self.chunk.to_model(),
             embedding=EmbeddingModel(
-                vector=self.embedding.tolist(),
+                vector=self.embedding,
                 dimension=len(self.embedding),
                 model_name=self.model_info.get("model", "text-embedding-v3"),
                 model_version=self.model_info.get("version", "")

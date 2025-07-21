@@ -30,6 +30,8 @@ class AgentResponse(BaseModel):
     model_used: Optional[str] = Field(None, description="使用的AI模型")
     error: Optional[str] = Field(None, description="错误信息")
 
+    model_config = {"protected_namespaces": ()}
+
 
 class ChatMessage(BaseModel):
     """聊天消息模型"""
@@ -37,6 +39,8 @@ class ChatMessage(BaseModel):
     session_id: str = Field(..., description="会话ID")
     message: str = Field(..., description="消息内容")
     model_name: Optional[str] = Field(None, description="指定使用的AI模型名称")
+
+    model_config = {"protected_namespaces": ()}
 
 
 class ChatResponse(BaseModel):

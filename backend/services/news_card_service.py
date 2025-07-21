@@ -647,4 +647,15 @@ class NewsCardService:
             'people': [],
             'organizations': [],
             'locations': []
-        } 
+        }
+
+
+# 服务实例
+_news_card_service = None
+
+async def get_news_card_service() -> NewsCardService:
+    """获取新闻卡片服务实例"""
+    global _news_card_service
+    if _news_card_service is None:
+        _news_card_service = NewsCardService()
+    return _news_card_service

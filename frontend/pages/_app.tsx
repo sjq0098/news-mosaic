@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import { ConfigProvider, theme } from 'antd'
 import { useState, useEffect } from 'react'
+import { AuthProvider } from '../contexts/AuthContext'
 import '../styles/globals.css'
 
 // Ant Design 主题配置
@@ -55,9 +56,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ConfigProvider theme={isDarkMode ? darkTheme : lightTheme}>
-      <div className={isDarkMode ? 'dark' : ''}>
-        <Component {...pageProps} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-      </div>
+      <AuthProvider>
+        <div className={isDarkMode ? 'dark' : ''}>
+          <Component {...pageProps} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+        </div>
+      </AuthProvider>
     </ConfigProvider>
   )
 }

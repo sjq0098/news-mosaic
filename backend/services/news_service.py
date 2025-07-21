@@ -8,6 +8,8 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import logging
 from core.config import settings
+from core.database import get_mongodb_database, Collections
+from models.news import NewsModel
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +216,59 @@ class NewsService:
         
         return summary
     
+    async def get_news_by_id(self, news_id: str) -> Optional[NewsModel]:
+        """根据ID获取新闻"""
+        try:
+            db = await get_mongodb_database()
+            if db is None:
+                logger.error("数据库连接未初始化")
+                return None
+
+            news_doc = await db[Collections.NEWS].find_one({"_id": news_id})
+
+            if not news_doc:
+                logger.warning(f"新闻不存在: {news_id}")
+                return None
+
+            # 转换为NewsModel
+            from models.news import NewsSource, NewsCategory
+
+            # 安全地转换source
+            source_value = news_doc.get("source", "manual")
+            try:
+                source = NewsSource(source_value)
+            except ValueError:
+                source = NewsSource.MANUAL
+
+            # 安全地转换category
+            category_value = news_doc.get("category", "general")
+            try:
+                category = NewsCategory(category_value)
+            except ValueError:
+                category = NewsCategory.GENERAL
+
+            news_model = NewsModel(
+                id=news_doc["_id"],
+                title=news_doc["title"],
+                content=news_doc.get("content", ""),
+                url=news_doc["url"],
+                image_url=news_doc.get("image_url"),
+                source=source,
+                category=category,
+                published_at=news_doc.get("published_at", datetime.utcnow()),
+                created_at=news_doc.get("created_at", datetime.utcnow()),
+                tags=news_doc.get("tags", []),
+                view_count=news_doc.get("view_count", 0),
+                like_count=news_doc.get("like_count", 0),
+                metadata=news_doc.get("metadata", {})
+            )
+
+            return news_model
+
+        except Exception as e:
+            logger.error(f"获取新闻失败 {news_id}: {e}")
+            return None
+
     async def close(self):
         """关闭 HTTP 客户端"""
         await self.client.aclose()

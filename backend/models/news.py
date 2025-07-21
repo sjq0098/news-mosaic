@@ -33,6 +33,7 @@ class NewsCategory(str, Enum):
     SPORTS = "sports"
     POLITICS = "politics"
     WORLD = "world"
+    GENERAL = "general"
     OTHER = "other"
 
 

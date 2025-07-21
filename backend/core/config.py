@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     APP_NAME: str = Field(default="news-mosaic", description="应用名称")
     APP_VERSION: str = Field(default="1.0.0", description="应用版本")
     DEBUG: bool = Field(default=True, description="调试模式")
+    DEMO_MODE: bool = Field(default=True, description="演示模式")
     SECRET_KEY: str = Field(default="your-secret-key-here", description="应用密钥")
     
     # API 服务配置
@@ -58,12 +59,6 @@ class Settings(BaseSettings):
     MONGODB_URL: str = Field(default="mongodb://localhost:27017", description="MongoDB 连接URL")
     MONGODB_DB_NAME: str = Field(default="news_mosaic", description="MongoDB 数据库名")
     
-    MYSQL_HOST: str = Field(default="localhost", description="MySQL 主机")
-    MYSQL_PORT: int = Field(default=3306, description="MySQL 端口")
-    MYSQL_USER: str = Field(default="root", description="MySQL 用户")
-    MYSQL_PASSWORD: str = Field(default="", description="MySQL 密码")
-    MYSQL_DATABASE: str = Field(default="news_mosaic", description="MySQL 数据库")
-    
     # Redis 配置
     REDIS_HOST: str = Field(default="localhost", description="Redis 主机")
     REDIS_PORT: int = Field(default=6379, description="Redis 端口")
@@ -95,9 +90,14 @@ class Settings(BaseSettings):
     LOG_FILE: str = Field(default="logs/app.log", description="日志文件")
     
     # 安全配置
-    JWT_SECRET_KEY: str = Field(default="your-jwt-secret-key", description="JWT 密钥")
+    JWT_SECRET_KEY: str = Field(default="your-jwt-secret-key-change-in-production", description="JWT 密钥")
     JWT_ALGORITHM: str = Field(default="HS256", description="JWT 算法")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, description="访问令牌过期时间（分钟）")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=1440, description="访问令牌过期时间（分钟）")  # 24小时
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=30, description="刷新令牌过期时间（天）")
+
+    # 密码安全配置
+    PASSWORD_MIN_LENGTH: int = Field(default=6, description="密码最小长度")
+    PASSWORD_HASH_ROUNDS: int = Field(default=12, description="密码哈希轮数")
     
     # 限流配置
     RATE_LIMIT_PER_MINUTE: int = Field(default=60, description="每分钟请求限制")

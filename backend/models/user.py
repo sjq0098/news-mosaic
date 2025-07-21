@@ -174,8 +174,11 @@ class UserSession(BaseModel):
 
 class UserCreateRequest(BaseModel):
     """用户创建请求模型"""
-    username: str = Field(..., min_length=1, description="用户名")
-    password: str = Field(..., min_length=1, description="密码")
+    username: str = Field(..., min_length=3, max_length=50, description="用户名")
+    email: str = Field(..., description="邮箱地址")
+    password: str = Field(..., min_length=6, max_length=128, description="密码")
+    nickname: Optional[str] = Field(None, max_length=100, description="昵称")
+    bio: Optional[str] = Field(None, max_length=500, description="个人简介")
 
 
 class UserLoginRequest(BaseModel):
@@ -229,6 +232,9 @@ class UserLoginResult(BaseModel):
     message: str = "登录成功"
     user_id: str
     username: str
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: str = "bearer"
     sessions: List[Dict[str, Any]] = []
 
 

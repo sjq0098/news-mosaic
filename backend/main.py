@@ -129,11 +129,27 @@ app.include_router(sentiment.router, prefix="/api/sentiment", tags=["情感分�
 app.include_router(embedding_router, prefix="/api/embedding", tags=["embedding"])
 app.include_router(news_card.router, tags=["新闻卡片"])
 
+# 导入并注册统一新闻处理API
+from api.unified_news import router as unified_news_router
+app.include_router(unified_news_router, tags=["统一新闻处理"])
+
 
 
 # 导入并注册Pipeline API
 from api.pipeline import router as pipeline_router
 app.include_router(pipeline_router, tags=["智能分析Pipeline"])
+
+# 导入并注册新闻处理流水线API
+from api.news_pipeline import router as news_pipeline_router
+app.include_router(news_pipeline_router, tags=["新闻处理流水线"])
+
+# 导入并注册增强RAG对话API
+from api.enhanced_chat import router as enhanced_chat_router
+app.include_router(enhanced_chat_router, tags=["增强RAG对话"])
+
+# 导入并注册用户记忆管理API
+from api.user_memory import router as user_memory_router
+app.include_router(user_memory_router, tags=["用户记忆管理"])
 
 # 导入并注册智能聊天API
 from api.intelligent_chat import router as intelligent_chat_router

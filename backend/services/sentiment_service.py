@@ -49,6 +49,33 @@ class SentimentService:
             analysis=analysis,
             processing_time=0.1
         )
+
+    async def analyze_text(self, text: str, language: str = "zh") -> Dict[str, Any]:
+        """分析文本情感 - 简化版本，返回字典格式"""
+        try:
+            # 简单的情感分析逻辑
+            if "好" in text or "棒" in text or "赞" in text or "优秀" in text or "成功" in text:
+                sentiment = "positive"
+                score = 0.8
+            elif "坏" in text or "差" in text or "糟" in text or "失败" in text or "问题" in text:
+                sentiment = "negative"
+                score = -0.8
+            else:
+                sentiment = "neutral"
+                score = 0.0
+
+            return {
+                "label": sentiment,
+                "score": score,
+                "confidence": 0.85
+            }
+        except Exception as e:
+            logger.error(f"情感分析失败: {e}")
+            return {
+                "label": "neutral",
+                "score": 0.0,
+                "confidence": 0.0
+            }
     
     async def batch_analyze_sentiment(self, request: BatchSentimentRequest) -> BatchSentimentResponse:
         """批量分析文本情感"""
