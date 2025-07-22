@@ -3,7 +3,7 @@ import axios from 'axios'
 // 创建axios实例
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-  timeout: 30000,
+  timeout: 300000, // 5分钟超时，适应新闻处理流水线的长时间处理
   headers: {
     'Content-Type': 'application/json',
   },
@@ -127,7 +127,7 @@ export const newsPipelineApi = {
     max_cards?: number
     include_related_news?: boolean
     personalization_level?: number
-  }) => api.post('/api/news-pipeline/process', params, { timeout: 120000 }), // 2分钟超时
+  }) => api.post('/api/news-pipeline/process', params, { timeout: 300000 }), // 5分钟超时，适应完整流水线处理
 
   // 快速处理
   quickProcess: (query: string, num_results?: number) =>

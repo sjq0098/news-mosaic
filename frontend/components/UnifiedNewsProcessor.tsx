@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  Card, 
-  Input, 
-  Button, 
-  Space, 
-  Spin, 
-  Alert, 
-  Tabs, 
-  Tag, 
-  Progress, 
+import {
+  Card,
+  Input,
+  Button,
+  Space,
+  Spin,
+  Alert,
+  Tabs,
+  Tag,
+  Progress,
   Timeline,
   Statistic,
   Row,
@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons'
 import { newsPipelineApi, enhancedChatApi } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import MarkdownRenderer from './MarkdownRenderer'
 
 const { Search } = Input
 const { TabPane } = Tabs
@@ -354,7 +355,13 @@ const UnifiedNewsProcessor: React.FC = () => {
                   {msg.role === 'user' ? '👤' : '🤖'}
                 </div>
                 <div className="message-content">
-                  <div className="message-text">{msg.content}</div>
+                  <div className="message-text">
+                    {msg.role === 'assistant' ? (
+                      <MarkdownRenderer content={msg.content} />
+                    ) : (
+                      msg.content
+                    )}
+                  </div>
                   {msg.confidence_score && (
                     <div className="message-meta">
                       <span className="confidence-score">
