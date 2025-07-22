@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Layout, Menu, Button, Switch, Avatar, Dropdown, Space, message, Card, Spin } from 'antd'
 import {
   SearchOutlined,
@@ -17,9 +17,11 @@ import {
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { useRouter } from 'next/router'
-import UnifiedNewsProcessor from '../components/UnifiedNewsProcessor'
+import UnifiedNewsProcessor, { UnifiedNewsProcessorRef } from '../components/UnifiedNewsProcessor'
+import SearchHistory from '../components/SearchHistory'
 import { checkApiHealth } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { useSearchHistory } from '../hooks/useSearchHistory'
 
 const { Header, Sider, Content } = Layout
 
@@ -33,6 +35,8 @@ interface HomePageProps {
 export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
   const router = useRouter()
   const { user, isAuthenticated, logout, isLoading } = useAuth()
+  const { addSearchRecord } = useSearchHistory()
+  const newsProcessorRef = useRef<UnifiedNewsProcessorRef>(null)
   const [collapsed, setCollapsed] = useState(false)
   const [apiStatus, setApiStatus] = useState<'online' | 'offline' | 'checking'>('checking')
 
@@ -130,9 +134,24 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
     }
   }
 
+  // 处理搜索历史选择
+  const handleSearchHistorySelect = (query: string) => {
+    if (newsProcessorRef.current) {
+      newsProcessorRef.current.triggerSearch(query)
+      message.success(`正在搜索: ${query}`)
+    }
+  }
+
+  // 处理历史状态恢复
+  const handleHistoryRestore = (historyItem: any) => {
+    if (newsProcessorRef.current) {
+      newsProcessorRef.current.restoreHistoryState(historyItem)
+    }
+  }
+
   // 渲染内容区域（现在只有统一新闻处理功能）
   const renderContent = () => {
-    return <UnifiedNewsProcessor />
+    return <UnifiedNewsProcessor ref={newsProcessorRef} />
   }
 
   // 获取页面标题
@@ -209,11 +228,22 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
           />
         </div>
 
-        {/* API状态指示器和用户信息 */}
+        {/* 搜索历史区域 */}
         {!collapsed && (
-          <div className="absolute bottom-4 left-4 right-4 space-y-3">
+          <div className="px-3 mt-6 flex-1 overflow-hidden">
+            <SearchHistory
+              onSearchSelect={handleSearchHistorySelect}
+              onHistoryRestore={handleHistoryRestore}
+              maxHeight="calc(100vh - 400px)"
+            />
+          </div>
+        )}
+
+        {/* 底部固定区域：用户信息和API状态 */}
+        {!collapsed && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 space-y-3 bg-gradient-to-t from-gray-900/50 to-transparent backdrop-blur-sm">
             {/* 用户信息卡片 */}
-            <div className="glass-card p-3 bg-white/5">
+            <div className="glass-card p-3 bg-white/5 sticky-user-card">
               <div className="flex items-center space-x-3">
                 <Avatar
                   size="small"

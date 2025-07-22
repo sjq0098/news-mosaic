@@ -758,6 +758,148 @@ body {
   background: transparent !important;
 }
 
+/* 侧栏布局优化 */
+.modern-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-sidebar .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+}
+
+/* 用户卡片固定定位样式 */
+.sticky-user-card {
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 搜索历史区域样式 */
+.search-history-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 确保侧栏内容不会被底部固定区域遮挡 */
+.modern-sidebar .ant-layout-sider-children > div:nth-child(3) {
+  margin-bottom: 140px; /* 为底部固定区域预留空间 */
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .modern-sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .modern-sidebar .ant-layout-sider-children > div:nth-child(3) {
+    margin-bottom: 120px; /* 移动端减少底部空间 */
+  }
+
+  .search-history-container {
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .sticky-user-card {
+    padding: 8px !important;
+  }
+
+  .status-indicator {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-sidebar .ant-layout-sider-children > div:nth-child(3) {
+    margin-bottom: 100px; /* 小屏幕进一步减少空间 */
+  }
+
+  .search-history-container {
+    padding: 6px;
+    border-radius: 6px;
+  }
+
+  .search-history-item {
+    padding: 4px 0 !important;
+  }
+}
+
+/* 搜索历史组件样式增强 */
+.search-history-container .ant-list-item {
+  border-bottom: none !important;
+  padding: 4px 8px !important;
+  margin: 2px 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.search-history-container .ant-list-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: translateX(2px);
+}
+
+.search-history-container .ant-empty {
+  margin: 16px 0;
+}
+
+.search-history-container .ant-empty-description {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 用户卡片样式增强 */
+.sticky-user-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.sticky-user-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 状态指示器样式优化 */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.status-online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-loading {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
 .dark .ant-layout-sider {
   background: var(--glass-bg) !important;
   backdrop-filter: blur(20px);

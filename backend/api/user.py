@@ -383,6 +383,196 @@ async def get_recommended_keywords(current_user: Dict[str, Any] = Depends(get_cu
         return {"status": "error", "data": []}
 
 
+# ==================== 搜索历史接口 ====================
+
+@router.get("/search-history")
+async def get_user_search_history(
+    limit: int = 50,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    获取用户搜索历史
+    """
+    try:
+        from core.database import get_mongodb_database, Collections
+
+        db = await get_mongodb_database()
+        if not db:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="数据库连接失败"
+            )
+
+        # 查询用户搜索历史
+        cursor = db[Collections.SEARCH_HISTORY].find(
+            {"user_id": current_user["id"]}
+        ).sort("timestamp", -1).limit(limit)
+
+        history = []
+        async for record in cursor:
+            history.append({
+                "_id": str(record["_id"]),
+                "query": record["query"],
+                "timestamp": record["timestamp"],
+                "results_count": record.get("results_count", 0),
+                "cards_generated": record.get("cards_generated", 0)
+            })
+
+        return {"status": "success", "data": history}
+
+    except Exception as e:
+        logger.error(f"获取搜索历史失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="获取搜索历史失败"
+        )
+
+
+@router.post("/search-history")
+async def add_search_record(
+    request: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    添加搜索记录
+    """
+    try:
+        from core.database import get_mongodb_database, Collections
+        from datetime import datetime
+        import uuid
+
+        query = request.get("query", "").strip()
+        if not query:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="搜索查询不能为空"
+            )
+
+        db = await get_mongodb_database()
+        if not db:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="数据库连接失败"
+            )
+
+        # 创建搜索记录
+        search_record = {
+            "_id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "query": query,
+            "timestamp": datetime.utcnow(),
+            "metadata": request.get("metadata", {})
+        }
+
+        # 检查是否已存在相同查询，如果存在则更新时间戳
+        existing = await db[Collections.SEARCH_HISTORY].find_one({
+            "user_id": current_user["id"],
+            "query": query
+        })
+
+        if existing:
+            # 更新现有记录的时间戳
+            await db[Collections.SEARCH_HISTORY].update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"timestamp": datetime.utcnow()}}
+            )
+            record_id = str(existing["_id"])
+        else:
+            # 插入新记录
+            await db[Collections.SEARCH_HISTORY].insert_one(search_record)
+            record_id = search_record["_id"]
+
+        return {
+            "status": "success",
+            "message": "搜索记录已保存",
+            "record_id": record_id
+        }
+
+    except Exception as e:
+        logger.error(f"添加搜索记录失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="添加搜索记录失败"
+        )
+
+
+@router.delete("/search-history/{record_id}")
+async def delete_search_record(
+    record_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    删除单条搜索记录
+    """
+    try:
+        from core.database import get_mongodb_database, Collections
+
+        db = await get_mongodb_database()
+        if not db:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="数据库连接失败"
+            )
+
+        # 删除指定的搜索记录
+        result = await db[Collections.SEARCH_HISTORY].delete_one({
+            "_id": record_id,
+            "user_id": current_user["id"]
+        })
+
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="搜索记录不存在"
+            )
+
+        return {"status": "success", "message": "搜索记录已删除"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除搜索记录失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="删除搜索记录失败"
+        )
+
+
+@router.delete("/search-history")
+async def clear_search_history(
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    清空用户搜索历史
+    """
+    try:
+        from core.database import get_mongodb_database, Collections
+
+        db = await get_mongodb_database()
+        if not db:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="数据库连接失败"
+            )
+
+        # 删除用户的所有搜索记录
+        result = await db[Collections.SEARCH_HISTORY].delete_many({
+            "user_id": current_user["id"]
+        })
+
+        return {
+            "status": "success",
+            "message": f"已清空 {result.deleted_count} 条搜索记录"
+        }
+
+    except Exception as e:
+        logger.error(f"清空搜索历史失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="清空搜索历史失败"
+        )
+
+
 # ==================== 统计和工具接口 ====================
 
 @router.post("/stats/increment/{stat_type}")

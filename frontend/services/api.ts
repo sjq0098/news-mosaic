@@ -204,6 +204,28 @@ export const enhancedChatApi = {
   healthCheck: () => api.get('/api/enhanced-chat/health'),
 }
 
+// 搜索历史API
+export const searchHistoryApi = {
+  // 获取搜索历史
+  getSearchHistory: (limit?: number) =>
+    api.get('/api/user/search-history', { params: { limit } }),
+
+  // 添加搜索记录
+  addSearchRecord: (data: {
+    query: string
+    timestamp?: string
+    metadata?: any
+  }) => api.post('/api/user/search-history', data),
+
+  // 删除搜索记录
+  deleteSearchRecord: (recordId: string) =>
+    api.delete(`/api/user/search-history/${recordId}`),
+
+  // 清空搜索历史
+  clearSearchHistory: () =>
+    api.delete('/api/user/search-history'),
+}
+
 // 用户记忆管理API
 export const userMemoryApi = {
   // 记录用户行为

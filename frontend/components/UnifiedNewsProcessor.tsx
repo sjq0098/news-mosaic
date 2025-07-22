@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import {
   Card,
   Input,
@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons'
 import { newsPipelineApi, enhancedChatApi } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { useSearchHistory } from '../hooks/useSearchHistory'
 import MarkdownRenderer from './MarkdownRenderer'
 
 const { Search } = Input
@@ -65,13 +66,26 @@ interface NewsProcessingResult {
   recommended_queries: string[]
 }
 
-const UnifiedNewsProcessor: React.FC = () => {
-  const { user } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<NewsProcessingResult | null>(null)
-  const [chatLoading, setChatLoading] = useState(false)
-  const [chatMessages, setChatMessages] = useState<any[]>([])
-  const [currentSessionId, setCurrentSessionId] = useState<string>('')
+interface UnifiedNewsProcessorProps {
+  externalQuery?: string
+  onQueryChange?: (query: string) => void
+}
+
+export interface UnifiedNewsProcessorRef {
+  triggerSearch: (query: string) => void
+  restoreHistoryState: (historyItem: any) => void
+}
+
+const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProcessorProps>(
+  ({ externalQuery, onQueryChange }, ref) => {
+    const { user } = useAuth()
+    const { addSearchRecord } = useSearchHistory()
+    const [loading, setLoading] = useState(false)
+    const [result, setResult] = useState<NewsProcessingResult | null>(null)
+    const [chatLoading, setChatLoading] = useState(false)
+    const [chatMessages, setChatMessages] = useState<any[]>([])
+    const [currentSessionId, setCurrentSessionId] = useState<string>('')
+    const [currentQuery, setCurrentQuery] = useState('')
   
   // 处理配置
   const [config, setConfig] = useState({
@@ -93,6 +107,8 @@ const UnifiedNewsProcessor: React.FC = () => {
     }
 
     setLoading(true)
+    setCurrentQuery(query)
+
     try {
       const response = await newsPipelineApi.processNews({
         query,
@@ -102,6 +118,23 @@ const UnifiedNewsProcessor: React.FC = () => {
       if (response.data.success) {
         setResult(response.data)
         message.success('新闻处理完成！')
+
+        // 记录搜索历史，包含完整的搜索结果和对话记录
+        await addSearchRecord(
+          query,
+          {
+            results_count: response.data.stages?.find((s: any) => s.stage === 'news_collection')?.data?.length || 0,
+            cards_generated: response.data.stages?.find((s: any) => s.stage === 'card_generation')?.data?.length || 0
+          },
+          response.data, // 保存完整的搜索结果
+          chatMessages, // 保存当前的对话记录
+          currentSessionId // 保存会话ID
+        )
+
+        // 通知父组件查询变化
+        if (onQueryChange) {
+          onQueryChange(query)
+        }
       } else {
         message.error(response.data.message || '处理失败')
       }
@@ -112,6 +145,40 @@ const UnifiedNewsProcessor: React.FC = () => {
       setLoading(false)
     }
   }
+
+  // 恢复历史状态
+  const restoreHistoryState = useCallback((historyItem: any) => {
+    if (historyItem.searchResult) {
+      setResult(historyItem.searchResult)
+      setCurrentQuery(historyItem.query)
+
+      if (historyItem.chatMessages) {
+        setChatMessages(historyItem.chatMessages)
+      }
+
+      if (historyItem.sessionId) {
+        setCurrentSessionId(historyItem.sessionId)
+      }
+
+      message.success(`已恢复搜索结果: ${historyItem.query}`)
+    }
+  }, [])
+
+  // 暴露给父组件的方法
+  useImperativeHandle(ref, () => ({
+    triggerSearch: (query: string) => {
+      setCurrentQuery(query)
+      handleNewsProcessing(query)
+    },
+    restoreHistoryState
+  }))
+
+  // 监听外部查询变化
+  useEffect(() => {
+    if (externalQuery && externalQuery !== currentQuery) {
+      handleNewsProcessing(externalQuery)
+    }
+  }, [externalQuery])
 
   const handleChatWithNews = async (userMessage: string) => {
     if (!userMessage.trim()) {
@@ -553,6 +620,8 @@ const UnifiedNewsProcessor: React.FC = () => {
       )}
     </div>
   )
-}
+})
+
+UnifiedNewsProcessor.displayName = 'UnifiedNewsProcessor'
 
 export default UnifiedNewsProcessor
