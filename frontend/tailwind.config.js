@@ -8,23 +8,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // 马卡龙主色调
         primary: {
-          50: '#f0f9ff',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+          50: '#F0FDF4',
+          100: '#D1E8F7',
+          200: '#A8D8F0',
+          300: '#7BC3E8',
+          400: '#5BAEE2',
+          500: '#3B9ADB',
+          600: '#2B7BC7',
+          700: '#1E5F9A',
+          800: '#164A7A',
+          900: '#0F3A5F',
         },
+        // 马卡龙色系
+        macaron: {
+          pink: '#FADADD',
+          'pink-light': '#FDF2F8',
+          mint: '#D7F0E9',
+          'mint-light': '#F0FDF4',
+          yellow: '#FFF2CC',
+          'yellow-light': '#FFFBEB',
+          lavender: '#E8D5FF',
+          'lavender-light': '#FAF5FF',
+          cream: '#FFFEF7',
+          warm: '#F5F5F0',
+        },
+        // 温暖灰色系
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+          50: '#F8F8F8',
+          100: '#F0F4F8',
+          200: '#E2E8F0',
+          300: '#CBD5E0',
+          400: '#A0AEC0',
+          500: '#718096',
+          600: '#4A5568',
+          700: '#2D3748',
+          800: '#1A202C',
+          900: '#171923',
         },
       },
       fontFamily: {
