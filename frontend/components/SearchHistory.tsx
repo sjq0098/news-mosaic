@@ -201,10 +201,12 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
 
       <style jsx>{`
         .search-history-container {
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 12px;
-          padding: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 16px;
+          padding: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
         }
 
         .search-history-list {
@@ -213,30 +215,123 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
 
         .search-history-item {
           border: none !important;
-          padding: 8px 0 !important;
+          padding: 12px 8px !important;
+          border-radius: 12px !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
         .search-history-item:hover {
-          background: rgba(255, 255, 255, 0.05) !important;
+          background: rgba(255, 255, 255, 0.2) !important;
+          transform: translateX(4px) !important;
+          box-shadow: 0 4px 12px rgba(168, 216, 240, 0.15) !important;
         }
 
-        /* 自定义滚动条 */
+        /* 马卡农配色文本 */
+        .search-history-item .text-white\\/90 {
+          color: #2D3748 !important;
+          font-weight: 600 !important;
+        }
+
+        .search-history-item .text-white\\/40 {
+          color: #718096 !important;
+        }
+
+        .search-history-item .text-white\\/70 {
+          color: #4A5568 !important;
+        }
+
+        .search-history-item .text-white\\/50 {
+          color: #718096 !important;
+        }
+
+        .search-history-item .text-green-400 {
+          color: #10B981 !important;
+        }
+
+        /* 图标颜色调整 */
+        .search-history-container .anticon {
+          color: #4A5568 !important;
+        }
+
+        .search-history-container .text-white\\/70 {
+          color: #4A5568 !important;
+        }
+
+        .search-history-container .text-white\\/90 {
+          color: #2D3748 !important;
+        }
+
+        .search-history-container .text-white\\/50 {
+          color: #718096 !important;
+        }
+
+        /* 按钮样式 */
+        .search-history-container .ant-btn {
+          border-radius: 10px !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .search-history-container .ant-btn:hover {
+          background: rgba(255, 255, 255, 0.3) !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 4px 8px rgba(168, 216, 240, 0.2) !important;
+        }
+
+        /* 空状态样式 */
+        .search-history-container .ant-empty-description {
+          color: #718096 !important;
+        }
+
+        /* 自定义滚动条 - 马卡农风格 */
         .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
+          width: 6px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 2px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 3px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 2px;
+          background: linear-gradient(135deg, var(--macaron-mint), var(--macaron-yellow));
+          border-radius: 3px;
+          transition: background 0.3s ease;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: linear-gradient(135deg, var(--macaron-pink), var(--macaron-lavender));
+        }
+
+        /* 加载状态样式 */
+        .search-history-container .ant-spin {
+          color: #4A5568 !important;
+        }
+
+        /* 删除按钮特殊样式 */
+        .search-history-item .hover\\:text-red-400:hover {
+          color: #EF4444 !important;
+          background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        /* 悬停动画增强 */
+        .search-history-item {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .search-history-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+          transition: left 0.5s;
+        }
+
+        .search-history-item:hover::before {
+          left: 100%;
         }
       `}</style>
     </div>

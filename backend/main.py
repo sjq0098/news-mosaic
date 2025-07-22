@@ -61,8 +61,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS.split(","),
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # 配置可信主机中间件
@@ -77,12 +78,22 @@ if not settings.DEBUG:
 async def log_requests(request: Request, call_next):
     """请求日志中间件"""
     start_time = logger.opt(record=True).info(f"请求开始: {request.method} {request.url}")
-    
+
+    # 处理 OPTIONS 预检请求
+    if request.method == "OPTIONS":
+        response = JSONResponse(content={})
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        logger.info(f"OPTIONS 预检请求处理完成: {request.url}")
+        return response
+
     response = await call_next(request)
-    
+
     process_time = logger.opt(record=True).info(f"请求完成: {request.method} {request.url} - 状态码: {response.status_code}")
     response.headers["X-Process-Time"] = str(process_time)
-    
+
     return response
 
 

@@ -718,32 +718,1032 @@ body {
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-/* 响应式设计增强 */
+/* 马卡农主界面专用样式 */
+
+/* 马卡农侧边栏样式 */
+.macaron-sidebar .ant-layout-sider-children {
+  background: transparent !important;
+}
+
+.macaron-sidebar .ant-menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+.macaron-sidebar .ant-menu-item {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  margin: 4px 8px !important;
+  color: #4A5568 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.macaron-sidebar .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: #2D3748 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(168, 216, 240, 0.2) !important;
+}
+
+.macaron-sidebar .ant-menu-item-selected {
+  background: linear-gradient(135deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  color: #4A5568 !important;
+  font-weight: 600 !important;
+}
+
+/* 马卡农菜单标签样式 */
+.macaron-menu .ant-menu-item .rounded-full {
+  background: linear-gradient(45deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+  color: white !important;
+}
+
+/* 马卡农搜索容器样式 */
+.macaron-search-container {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.macaron-title {
+  background: linear-gradient(135deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.macaron-subtitle {
+  color: #718096 !important;
+  font-size: 1rem !important;
+}
+
+/* 马卡农搜索框样式 */
+.macaron-search-box .ant-input {
+  border-radius: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.macaron-search-box .ant-input:focus {
+  border-color: var(--macaron-mint) !important;
+  box-shadow: 0 0 0 4px rgba(215, 240, 233, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.macaron-search-button:hover {
+  background: linear-gradient(45deg, var(--macaron-yellow), var(--macaron-pink)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(250, 218, 221, 0.4) !important;
+}
+
+/* 马卡农下拉选择框样式 */
+.macaron-select .ant-select-selector {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.macaron-select:hover .ant-select-selector {
+  border-color: var(--macaron-mint) !important;
+}
+
+/* 马卡农文本按钮样式 */
+.macaron-text-button:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: #2D3748 !important;
+}
+
+/* 马卡农结果区域样式 */
+.macaron-results .overview-stats {
+  display: flex !important;
+  gap: 24px !important;
+  justify-content: space-around !important;
+  flex-wrap: wrap !important;
+}
+
+.macaron-stat {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  flex: 1 !important;
+  min-width: 200px !important;
+}
+
+.macaron-stat:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(168, 216, 240, 0.2) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 马卡农新闻卡片样式 */
+.news-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 20px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.news-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 12px 30px rgba(168, 216, 240, 0.25) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.news-card-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.news-card-summary {
+  color: #4A5568 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 16px !important;
+  flex-grow: 1 !important;
+}
+
+.sentiment-tag {
+  padding: 4px 12px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin-right: 8px !important;
+}
+
+.sentiment-tag.sentiment-positive {
+  background: linear-gradient(45deg, var(--macaron-mint-light), var(--macaron-mint)) !important;
+  color: #065f46 !important;
+}
+
+.sentiment-tag.sentiment-negative {
+  background: linear-gradient(45deg, var(--macaron-pink-light), var(--macaron-pink)) !important;
+  color: #7f1d1d !important;
+}
+
+.sentiment-tag.sentiment-neutral {
+  background: linear-gradient(45deg, var(--macaron-yellow-light), var(--macaron-yellow)) !important;
+  color: #78350f !important;
+}
+
+.importance-tag {
+  padding: 4px 12px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(45deg, var(--macaron-lavender-light), var(--macaron-lavender)) !important;
+  color: #581c87 !important;
+}
+
+/* 马卡农聊天界面样式 */
+.chat-empty-state {
+  text-align: center !important;
+  padding: 40px 20px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-empty-icon {
+  font-size: 3rem !important;
+  margin-bottom: 16px !important;
+}
+
+.chat-empty-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+.chat-empty-description {
+  color: #4A5568 !important;
+  margin-bottom: 20px !important;
+  line-height: 1.6 !important;
+}
+
+.chat-suggestions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.chat-suggestion {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 16px !important;
+  padding: 12px 20px !important;
+  color: #4A5568 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-suggestion:hover {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 15px rgba(168, 216, 240, 0.3) !important;
+  color: #2D3748 !important;
+}
+
+.chat-message {
+  display: flex !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+  align-items: flex-start !important;
+}
+
+.message-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2rem !important;
+  flex-shrink: 0 !important;
+}
+
+.user-message .message-avatar {
+  background: linear-gradient(45deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+}
+
+.ai-message .message-avatar {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+}
+
+.message-content {
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(15px) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.user-message .message-content {
+  background: linear-gradient(45deg, rgba(250, 218, 221, 0.3), rgba(232, 213, 255, 0.3)) !important;
+}
+
+.ai-message .message-content {
+  background: linear-gradient(45deg, rgba(215, 240, 233, 0.3), rgba(255, 242, 204, 0.3)) !important;
+}
+
+.message-text {
+  color: #2D3748 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 8px !important;
+}
+
+.message-meta {
+  display: flex !important;
+  gap: 16px !important;
+  font-size: 12px !important;
+  color: #718096 !important;
+}
+
+.chat-input {
+  margin-top: 20px !important;
+  padding: 20px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+.chat-search-input .ant-input {
+  border-radius: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-search-input .ant-input:focus {
+  border-color: var(--macaron-mint) !important;
+  box-shadow: 0 0 0 4px rgba(215, 240, 233, 0.3) !important;
+}
+
+.chat-search-input .ant-btn {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  border-color: transparent !important;
+  color: #4A5568 !important;
+  border-radius: 16px !important;
+}
+
+.chat-search-input .ant-btn:hover {
+  background: linear-gradient(45deg, var(--macaron-yellow), var(--macaron-pink)) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(168, 216, 240, 0.3) !important;
+}
+
+.chat-input-hint {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+  color: #718096 !important;
+  text-align: center !important;
+}
+
+.chat-loading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 16px !important;
+  color: #4A5568 !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* 情感统计样式增强 */
+.sentiment-stats {
+  display: flex !important;
+  gap: 20px !important;
+  justify-content: space-around !important;
+  flex-wrap: wrap !important;
+}
+
+.sentiment-stat {
+  flex: 1 !important;
+  min-width: 120px !important;
+  text-align: center !important;
+  padding: 20px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sentiment-stat:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(168, 216, 240, 0.2) !important;
+}
+
+.sentiment-stat.positive {
+  background: linear-gradient(135deg, rgba(215, 240, 233, 0.4), rgba(240, 253, 244, 0.4)) !important;
+}
+
+.sentiment-stat.negative {
+  background: linear-gradient(135deg, rgba(250, 218, 221, 0.4), rgba(253, 242, 248, 0.4)) !important;
+}
+
+.sentiment-stat.neutral {
+  background: linear-gradient(135deg, rgba(255, 242, 204, 0.4), rgba(255, 251, 235, 0.4)) !important;
+}
+
+.sentiment-icon {
+  font-size: 2rem !important;
+  margin-bottom: 12px !important;
+}
+
+.sentiment-percentage {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #2D3748 !important;
+  margin-bottom: 4px !important;
+}
+
+.sentiment-label {
+  font-size: 0.875rem !important;
+  color: #718096 !important;
+  font-weight: 500 !important;
+}
+
+/* AI摘要结构化样式 */
+.structured-summary {
+  line-height: 1.7 !important;
+}
+
+.summary-section {
+  margin-bottom: 20px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.summary-section-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  font-size: 1.1rem !important;
+}
+
+.summary-section-content {
+  color: #4A5568 !important;
+  line-height: 1.6 !important;
+}
+
+.summary-line {
+  margin-bottom: 8px !important;
+}
+
+.summary-line:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 响应式调整 */
 @media (max-width: 768px) {
-  .search-container {
-    padding: 1.5rem 1rem;
-  }
-
-  .search-title {
-    font-size: 1.5rem;
-  }
-
-  .search-subtitle {
-    font-size: 0.9rem;
-  }
-
-  .glass-card {
-    margin: 0 8px;
-    border-radius: 16px;
+  .macaron-search-container {
+    padding: 1.5rem !important;
+    border-radius: 20px !important;
   }
   
-  .modern-button {
-    padding: 10px 20px;
-    font-size: 13px;
+  .overview-stats {
+    flex-direction: column !important;
+    align-items: center !important;
   }
+  
+  .macaron-stat {
+    min-width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .sentiment-stats {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  
+  .chat-suggestions {
+    align-items: stretch !important;
+  }
+  
+  .chat-suggestion {
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
 
-  .spacing-enhanced {
-    padding: var(--spacing-xl) var(--spacing-lg);
+/* 马卡龙色彩工具类 */
+.bg-macaron-pink { background-color: var(--macaron-pink); }
+.bg-macaron-mint { background-color: var(--macaron-mint); }
+.bg-macaron-yellow { background-color: var(--macaron-yellow); }
+.bg-macaron-lavender { background-color: var(--macaron-lavender); }
+
+.text-macaron-pink { color: var(--macaron-pink); }
+.text-macaron-mint { color: var(--macaron-mint); }
+.text-macaron-yellow { color: var(--macaron-yellow); }
+.text-macaron-lavender { color: var(--macaron-lavender); }
+
+/* 边框工具类 */
+.border-macaron-pink { border-color: var(--macaron-pink); }
+.border-macaron-mint { border-color: var(--macaron-mint); }
+.border-macaron-yellow { border-color: var(--macaron-yellow); }
+.border-macaron-lavender { border-color: var(--macaron-lavender); }
+
+/* 性能优化 */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Ant Design 组件优化 */
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(168, 216, 240, 0.15) !important;
+}
+
+.ant-btn-primary {
+  background: var(--primary-gradient) !important;
+  border: none !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--primary-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* 马卡龙风格按钮悬停效果 */
+.ant-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(168, 216, 240, 0.3);
+}
+
+/* 自定义高度类 */
+.h-18 {
+  height: 4.5rem;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+/* 焦点样式现代化 */
+.focus-visible:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* 无障碍支持 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 马卡农主界面专用样式 */
+
+/* 马卡农侧边栏样式 */
+.macaron-sidebar .ant-layout-sider-children {
+  background: transparent !important;
+}
+
+.macaron-sidebar .ant-menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+.macaron-sidebar .ant-menu-item {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  margin: 4px 8px !important;
+  color: #4A5568 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.macaron-sidebar .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: #2D3748 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(168, 216, 240, 0.2) !important;
+}
+
+.macaron-sidebar .ant-menu-item-selected {
+  background: linear-gradient(135deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  color: #4A5568 !important;
+  font-weight: 600 !important;
+}
+
+/* 马卡农菜单标签样式 */
+.macaron-menu .ant-menu-item .rounded-full {
+  background: linear-gradient(45deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+  color: white !important;
+}
+
+/* 马卡农搜索容器样式 */
+.macaron-search-container {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.macaron-title {
+  background: linear-gradient(135deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.macaron-subtitle {
+  color: #718096 !important;
+  font-size: 1rem !important;
+}
+
+/* 马卡农搜索框样式 */
+.macaron-search-box .ant-input {
+  border-radius: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.macaron-search-box .ant-input:focus {
+  border-color: var(--macaron-mint) !important;
+  box-shadow: 0 0 0 4px rgba(215, 240, 233, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.macaron-search-button:hover {
+  background: linear-gradient(45deg, var(--macaron-yellow), var(--macaron-pink)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(250, 218, 221, 0.4) !important;
+}
+
+/* 马卡农下拉选择框样式 */
+.macaron-select .ant-select-selector {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.macaron-select:hover .ant-select-selector {
+  border-color: var(--macaron-mint) !important;
+}
+
+/* 马卡农文本按钮样式 */
+.macaron-text-button:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: #2D3748 !important;
+}
+
+/* 马卡农结果区域样式 */
+.macaron-results .overview-stats {
+  display: flex !important;
+  gap: 24px !important;
+  justify-content: space-around !important;
+  flex-wrap: wrap !important;
+}
+
+.macaron-stat {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  flex: 1 !important;
+  min-width: 200px !important;
+}
+
+.macaron-stat:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(168, 216, 240, 0.2) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 马卡农新闻卡片样式 */
+.news-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 20px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.news-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 12px 30px rgba(168, 216, 240, 0.25) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.news-card-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.news-card-summary {
+  color: #4A5568 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 16px !important;
+  flex-grow: 1 !important;
+}
+
+.sentiment-tag {
+  padding: 4px 12px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin-right: 8px !important;
+}
+
+.sentiment-tag.sentiment-positive {
+  background: linear-gradient(45deg, var(--macaron-mint-light), var(--macaron-mint)) !important;
+  color: #065f46 !important;
+}
+
+.sentiment-tag.sentiment-negative {
+  background: linear-gradient(45deg, var(--macaron-pink-light), var(--macaron-pink)) !important;
+  color: #7f1d1d !important;
+}
+
+.sentiment-tag.sentiment-neutral {
+  background: linear-gradient(45deg, var(--macaron-yellow-light), var(--macaron-yellow)) !important;
+  color: #78350f !important;
+}
+
+.importance-tag {
+  padding: 4px 12px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(45deg, var(--macaron-lavender-light), var(--macaron-lavender)) !important;
+  color: #581c87 !important;
+}
+
+/* 马卡农聊天界面样式 */
+.chat-empty-state {
+  text-align: center !important;
+  padding: 40px 20px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-empty-icon {
+  font-size: 3rem !important;
+  margin-bottom: 16px !important;
+}
+
+.chat-empty-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+.chat-empty-description {
+  color: #4A5568 !important;
+  margin-bottom: 20px !important;
+  line-height: 1.6 !important;
+}
+
+.chat-suggestions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.chat-suggestion {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 16px !important;
+  padding: 12px 20px !important;
+  color: #4A5568 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-suggestion:hover {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 15px rgba(168, 216, 240, 0.3) !important;
+  color: #2D3748 !important;
+}
+
+.chat-message {
+  display: flex !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+  align-items: flex-start !important;
+}
+
+.message-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2rem !important;
+  flex-shrink: 0 !important;
+}
+
+.user-message .message-avatar {
+  background: linear-gradient(45deg, var(--macaron-pink), var(--macaron-lavender)) !important;
+}
+
+.ai-message .message-avatar {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+}
+
+.message-content {
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(15px) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.user-message .message-content {
+  background: linear-gradient(45deg, rgba(250, 218, 221, 0.3), rgba(232, 213, 255, 0.3)) !important;
+}
+
+.ai-message .message-content {
+  background: linear-gradient(45deg, rgba(215, 240, 233, 0.3), rgba(255, 242, 204, 0.3)) !important;
+}
+
+.message-text {
+  color: #2D3748 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 8px !important;
+}
+
+.message-meta {
+  display: flex !important;
+  gap: 16px !important;
+  font-size: 12px !important;
+  color: #718096 !important;
+}
+
+.chat-input {
+  margin-top: 20px !important;
+  padding: 20px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+.chat-search-input .ant-input {
+  border-radius: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-search-input .ant-input:focus {
+  border-color: var(--macaron-mint) !important;
+  box-shadow: 0 0 0 4px rgba(215, 240, 233, 0.3) !important;
+}
+
+.chat-search-input .ant-btn {
+  background: linear-gradient(45deg, var(--macaron-mint), var(--macaron-yellow)) !important;
+  border-color: transparent !important;
+  color: #4A5568 !important;
+  border-radius: 16px !important;
+}
+
+.chat-search-input .ant-btn:hover {
+  background: linear-gradient(45deg, var(--macaron-yellow), var(--macaron-pink)) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(168, 216, 240, 0.3) !important;
+}
+
+.chat-input-hint {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+  color: #718096 !important;
+  text-align: center !important;
+}
+
+.chat-loading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 16px !important;
+  color: #4A5568 !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* 情感统计样式增强 */
+.sentiment-stats {
+  display: flex !important;
+  gap: 20px !important;
+  justify-content: space-around !important;
+  flex-wrap: wrap !important;
+}
+
+.sentiment-stat {
+  flex: 1 !important;
+  min-width: 120px !important;
+  text-align: center !important;
+  padding: 20px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sentiment-stat:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(168, 216, 240, 0.2) !important;
+}
+
+.sentiment-stat.positive {
+  background: linear-gradient(135deg, rgba(215, 240, 233, 0.4), rgba(240, 253, 244, 0.4)) !important;
+}
+
+.sentiment-stat.negative {
+  background: linear-gradient(135deg, rgba(250, 218, 221, 0.4), rgba(253, 242, 248, 0.4)) !important;
+}
+
+.sentiment-stat.neutral {
+  background: linear-gradient(135deg, rgba(255, 242, 204, 0.4), rgba(255, 251, 235, 0.4)) !important;
+}
+
+.sentiment-icon {
+  font-size: 2rem !important;
+  margin-bottom: 12px !important;
+}
+
+.sentiment-percentage {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #2D3748 !important;
+  margin-bottom: 4px !important;
+}
+
+.sentiment-label {
+  font-size: 0.875rem !important;
+  color: #718096 !important;
+  font-weight: 500 !important;
+}
+
+/* AI摘要结构化样式 */
+.structured-summary {
+  line-height: 1.7 !important;
+}
+
+.summary-section {
+  margin-bottom: 20px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.summary-section-title {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  font-size: 1.1rem !important;
+}
+
+.summary-section-content {
+  color: #4A5568 !important;
+  line-height: 1.6 !important;
+}
+
+.summary-line {
+  margin-bottom: 8px !important;
+}
+
+.summary-line:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .macaron-search-container {
+    padding: 1.5rem !important;
+    border-radius: 20px !important;
+  }
+  
+  .overview-stats {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .macaron-stat {
+    min-width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .sentiment-stats {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  
+  .chat-suggestions {
+    align-items: stretch !important;
+  }
+  
+  .chat-suggestion {
+    width: 100% !important;
+    text-align: center !important;
   }
 }
 
@@ -962,80 +1962,3 @@ body {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
-
-/* 焦点样式现代化 */
-.focus-visible:focus {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-  border-radius: 8px;
-}
-
-/* 无障碍支持 */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* 性能优化 */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-opacity {
-  will-change: opacity;
-}
-
-/* Ant Design 组件优化 */
-.ant-input-affix-wrapper:focus,
-.ant-input-affix-wrapper-focused {
-  border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 3px rgba(168, 216, 240, 0.15) !important;
-}
-
-.ant-btn-primary {
-  background: var(--primary-gradient) !important;
-  border: none !important;
-}
-
-.ant-btn-primary:hover {
-  background: var(--primary-dark) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-/* 马卡龙风格按钮悬停效果 */
-.ant-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(168, 216, 240, 0.3);
-}
-
-/* 自定义高度类 */
-.h-18 {
-  height: 4.5rem;
-}
-
-.h-16 {
-  height: 4rem;
-}
-
-/* 马卡龙色彩工具类 */
-.bg-macaron-pink { background-color: var(--macaron-pink); }
-.bg-macaron-mint { background-color: var(--macaron-mint); }
-.bg-macaron-yellow { background-color: var(--macaron-yellow); }
-.bg-macaron-lavender { background-color: var(--macaron-lavender); }
-
-.text-macaron-pink { color: var(--macaron-pink); }
-.text-macaron-mint { color: var(--macaron-mint); }
-.text-macaron-yellow { color: var(--macaron-yellow); }
-.text-macaron-lavender { color: var(--macaron-lavender); }
-
-/* 边框工具类 */
-.border-macaron-pink { border-color: var(--macaron-pink); }
-.border-macaron-mint { border-color: var(--macaron-mint); }
-.border-macaron-yellow { border-color: var(--macaron-yellow); }
-.border-macaron-lavender { border-color: var(--macaron-lavender); }

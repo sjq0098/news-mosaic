@@ -20,11 +20,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
         rehypePlugins={[rehypeHighlight, rehypeRaw]}
         components={{
           // 自定义代码块渲染
-          code({ node, inline, className, children, ...props }) {
+          code({ node, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '')
+            const inline = (props as any)?.inline
             return !inline && match ? (
               <SyntaxHighlighter
-                style={tomorrow}
+                style={tomorrow as any}
                 language={match[1]}
                 PreTag="div"
                 {...props}
@@ -32,7 +33,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
             ) : (
-              <code className={className} {...props}>
+              <code className={className ? className : "markdown-inline-code"} {...props}>
                 {children}
               </code>
             )
@@ -121,10 +122,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
           hr: () => (
             <hr className="markdown-hr" />
           ),
-          // 自定义内联代码渲染
-          inlineCode: ({ children }) => (
-            <code className="markdown-inline-code">{children}</code>
-          )
+
         }}
       >
         {content}

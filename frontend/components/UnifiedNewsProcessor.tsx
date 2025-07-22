@@ -74,6 +74,7 @@ interface UnifiedNewsProcessorProps {
 export interface UnifiedNewsProcessorRef {
   triggerSearch: (query: string) => void
   restoreHistoryState: (historyItem: any) => void
+  clearCurrentSession: () => Promise<void>
 }
 
 const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProcessorProps>(
@@ -164,13 +165,44 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
     }
   }, [])
 
+  // 清空当前会话状态
+  const clearCurrentSession = useCallback(async () => {
+    // 如果有当前搜索结果和查询，先保存到历史记录（包含最新的对话记录）
+    if (result && currentQuery) {
+      try {
+        await addSearchRecord(
+          currentQuery,
+          {
+            results_count: result.total_found || 0,
+            cards_generated: result.cards_generated || 0
+          },
+          result, // 保存完整的搜索结果
+          chatMessages, // 保存当前的对话记录（包含用户的对话）
+          currentSessionId // 保存会话ID
+        )
+      } catch (error) {
+        console.error('保存搜索历史失败:', error)
+      }
+    }
+
+    // 清空所有状态
+    setResult(null)
+    setChatMessages([])
+    setCurrentSessionId('')
+    setCurrentQuery('')
+    setLoading(false)
+    setChatLoading(false)
+    message.success('已开启新的搜索会话')
+  }, [result, currentQuery, chatMessages, currentSessionId, addSearchRecord])
+
   // 暴露给父组件的方法
   useImperativeHandle(ref, () => ({
     triggerSearch: (query: string) => {
       setCurrentQuery(query)
       handleNewsProcessing(query)
     },
-    restoreHistoryState
+    restoreHistoryState,
+    clearCurrentSession
   }))
 
   // 监听外部查询变化
@@ -212,8 +244,27 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
           relevant_news: response.data.relevant_news
         }
 
-        setChatMessages(prev => [...prev, newMessage, aiResponse])
+        const updatedMessages = [...chatMessages, newMessage, aiResponse]
+        setChatMessages(updatedMessages)
         setCurrentSessionId(response.data.session_id)
+
+        // 对话后更新搜索历史记录（包含最新的对话）
+        if (result && currentQuery) {
+          try {
+            await addSearchRecord(
+              currentQuery,
+              {
+                results_count: result.total_found || 0,
+                cards_generated: result.cards_generated || 0
+              },
+              result, // 保存完整的搜索结果
+              updatedMessages, // 保存包含最新对话的记录
+              response.data.session_id // 保存会话ID
+            )
+          } catch (error) {
+            console.error('更新搜索历史失败:', error)
+          }
+        }
       } else {
         message.error('对话失败')
       }
@@ -473,30 +524,46 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="search-container">
+      <div className="search-container macaron-search-container">
         <div className="search-header">
-          <h2 className="search-title">探索新闻洞察</h2>
-          <p className="search-subtitle">输入关键词，发现最新新闻动态与深度分析</p>
+          <h2 className="search-title macaron-title">探索新闻洞察</h2>
+          <p className="search-subtitle macaron-subtitle">输入关键词，发现最新新闻动态与深度分析</p>
         </div>
         <div className="search-box-container">
           <Search
             placeholder="输入感兴趣的话题，例如：南开大学、人工智能、气候变化..."
             enterButton={
-              <Button type="primary" icon={<SearchOutlined />} loading={loading} className="search-button">
+              <Button 
+                type="primary" 
+                icon={<SearchOutlined />} 
+                loading={loading} 
+                className="search-button macaron-search-button"
+                style={{
+                  background: 'linear-gradient(45deg, #D7F0E9, #FFF2CC)',
+                  borderColor: 'transparent',
+                  color: '#4A5568'
+                }}
+              >
                 智能分析
               </Button>
             }
             size="large"
             onSearch={handleNewsProcessing}
             disabled={loading}
-            className="main-search-box"
+            className="main-search-box macaron-search-box"
+            style={{
+              borderRadius: '16px'
+            }}
           />
           <div className="search-options">
             <Select
               size="small"
               value={config.num_results}
               onChange={(value) => setConfig(prev => ({ ...prev, num_results: value }))}
-              className="search-option-select"
+              className="search-option-select macaron-select"
+              style={{
+                borderRadius: '12px'
+              }}
             >
               <Option value={10}>10 条结果</Option>
               <Option value={20}>20 条结果</Option>
@@ -507,7 +574,10 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
               size="small"
               value={config.max_cards}
               onChange={(value) => setConfig(prev => ({ ...prev, max_cards: value }))}
-              className="search-option-select"
+              className="search-option-select macaron-select"
+              style={{
+                borderRadius: '12px'
+              }}
             >
               <Option value={3}>3 张卡片</Option>
               <Option value={5}>5 张卡片</Option>
@@ -517,23 +587,37 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
               size="small"
               type="text"
               onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}
-              className="advanced-settings-button"
+              className="advanced-settings-button macaron-text-button"
+              style={{
+                color: '#4A5568',
+                borderRadius: '12px'
+              }}
             >
               高级设置
             </Button>
           </div>
         </div>
 
-        {/* 高级设置模态框 - 默认隐藏 */}
+        {/* 高级设置模态框 - 马卡农风格 */}
         <div id="advanced-settings-modal" className="advanced-settings-modal">
-          <Card title="高级处理设置" size="small" extra={<Button type="text" onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}>关闭</Button>}>
+          <Card 
+            title="高级处理设置" 
+            size="small" 
+            extra={<Button type="text" onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}>关闭</Button>}
+            style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.5)'
+            }}
+          >
             <Row gutter={16}>
               <Col span={24}>
                 <Space wrap>
-                  <span>存储: <Switch size="small" checked={config.enable_storage} onChange={(checked) => setConfig(prev => ({ ...prev, enable_storage: checked }))} /></span>
-                  <span>向量化: <Switch size="small" checked={config.enable_vectorization} onChange={(checked) => setConfig(prev => ({ ...prev, enable_vectorization: checked }))} /></span>
-                  <span>AI分析: <Switch size="small" checked={config.enable_ai_analysis} onChange={(checked) => setConfig(prev => ({ ...prev, enable_ai_analysis: checked }))} /></span>
-                  <span>卡片生成: <Switch size="small" checked={config.enable_card_generation} onChange={(checked) => setConfig(prev => ({ ...prev, enable_card_generation: checked }))} /></span>
+                  <span style={{ color: '#4A5568' }}>存储: <Switch size="small" checked={config.enable_storage} onChange={(checked) => setConfig(prev => ({ ...prev, enable_storage: checked }))} /></span>
+                  <span style={{ color: '#4A5568' }}>向量化: <Switch size="small" checked={config.enable_vectorization} onChange={(checked) => setConfig(prev => ({ ...prev, enable_vectorization: checked }))} /></span>
+                  <span style={{ color: '#4A5568' }}>AI分析: <Switch size="small" checked={config.enable_ai_analysis} onChange={(checked) => setConfig(prev => ({ ...prev, enable_ai_analysis: checked }))} /></span>
+                  <span style={{ color: '#4A5568' }}>卡片生成: <Switch size="small" checked={config.enable_card_generation} onChange={(checked) => setConfig(prev => ({ ...prev, enable_card_generation: checked }))} /></span>
                 </Space>
               </Col>
             </Row>
@@ -543,39 +627,59 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
 
       {/* 处理结果 */}
       {result && (
-        <div className="results-container">
-          {/* 处理概览 - 重新设计为更有意义的展示 */}
-          <div className="processing-overview">
+        <div className="results-container macaron-results">
+          {/* 处理概览 - 马卡农风格 */}
+          <div 
+            className="processing-overview"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px',
+              marginBottom: '24px'
+            }}
+          >
             <div className="overview-stats">
-              <div className="stat-item">
-                <div className="stat-icon">📰</div>
+              <div className="stat-item macaron-stat">
+                <div className="stat-icon" style={{ background: 'linear-gradient(45deg, #FADADD, #FFF2CC)', borderRadius: '16px', padding: '12px' }}>📰</div>
                 <div className="stat-content">
-                  <div className="stat-value">{result.total_found}</div>
-                  <div className="stat-label">篇相关新闻</div>
+                  <div className="stat-value" style={{ color: '#4A5568' }}>{result.total_found}</div>
+                  <div className="stat-label" style={{ color: '#718096' }}>篇相关新闻</div>
                 </div>
               </div>
-              <div className="stat-item">
-                <div className="stat-icon">🎯</div>
+              <div className="stat-item macaron-stat">
+                <div className="stat-icon" style={{ background: 'linear-gradient(45deg, #D7F0E9, #E8D5FF)', borderRadius: '16px', padding: '12px' }}>🎯</div>
                 <div className="stat-content">
-                  <div className="stat-value">{result.cards_generated}</div>
-                  <div className="stat-label">张核心事件卡片</div>
+                  <div className="stat-value" style={{ color: '#4A5568' }}>{result.cards_generated}</div>
+                  <div className="stat-label" style={{ color: '#718096' }}>张核心事件卡片</div>
                 </div>
               </div>
-              <div className="stat-item">
-                <div className="stat-icon">⚡</div>
+              <div className="stat-item macaron-stat">
+                <div className="stat-icon" style={{ background: 'linear-gradient(45deg, #FFF2CC, #FADADD)', borderRadius: '16px', padding: '12px' }}>⚡</div>
                 <div className="stat-content">
-                  <div className="stat-value">{result.processing_time.toFixed(1)}s</div>
-                  <div className="stat-label">处理完成</div>
+                  <div className="stat-value" style={{ color: '#4A5568' }}>{result.processing_time.toFixed(1)}s</div>
+                  <div className="stat-label" style={{ color: '#718096' }}>处理完成</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* AI分析摘要 - 结构化展示 */}
+          {/* AI分析摘要 - 马卡农风格 */}
           {result.ai_summary && (
-            <div className="ai-analysis-section">
-              <h3 className="section-title">
-                <RobotOutlined className="section-icon" />
+            <div 
+              className="ai-analysis-section"
+              style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                padding: '24px',
+                marginBottom: '24px'
+              }}
+            >
+              <h3 className="section-title" style={{ color: '#4A5568', marginBottom: '16px' }}>
+                <RobotOutlined className="section-icon" style={{ color: '#D7F0E9' }} />
                 智能分析洞察
               </h3>
               <div className="ai-summary-content">
@@ -584,11 +688,21 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
             </div>
           )}
 
-          {/* 情感分析概览 */}
+          {/* 情感分析概览 - 马卡农风格 */}
           {result.sentiment_overview && (
-            <div className="sentiment-section">
-              <h3 className="section-title">
-                <HeartOutlined className="section-icon" />
+            <div 
+              className="sentiment-section"
+              style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                padding: '24px',
+                marginBottom: '24px'
+              }}
+            >
+              <h3 className="section-title" style={{ color: '#4A5568', marginBottom: '16px' }}>
+                <HeartOutlined className="section-icon" style={{ color: '#FADADD' }} />
                 情感倾向分析
               </h3>
               <div className="sentiment-overview">
@@ -597,19 +711,38 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
             </div>
           )}
 
-          {/* 新闻卡片 - 主要展示区域 */}
-          <div className="news-cards-section">
-            <h3 className="section-title">
-              <FileTextOutlined className="section-icon" />
+          {/* 新闻卡片 - 马卡农风格 */}
+          <div 
+            className="news-cards-section"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px',
+              marginBottom: '24px'
+            }}
+          >
+            <h3 className="section-title" style={{ color: '#4A5568', marginBottom: '16px' }}>
+              <FileTextOutlined className="section-icon" style={{ color: '#FFF2CC' }} />
               核心新闻事件
             </h3>
             {renderNewsCards()}
           </div>
 
-          {/* 智能对话区域 */}
-          <div className="chat-section">
-            <h3 className="section-title">
-              <MessageOutlined className="section-icon" />
+          {/* 智能对话区域 - 马卡农风格 */}
+          <div 
+            className="chat-section"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px'
+            }}
+          >
+            <h3 className="section-title" style={{ color: '#4A5568', marginBottom: '16px' }}>
+              <MessageOutlined className="section-icon" style={{ color: '#E8D5FF' }} />
               继续深入探讨
             </h3>
             <div className="chat-container">
