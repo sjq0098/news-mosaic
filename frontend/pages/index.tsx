@@ -77,12 +77,7 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
     {
       key: 'unified',
       icon: <ThunderboltOutlined className="text-lg" />,
-      label: (
-        <div className="flex items-center justify-between">
-          <span className="font-medium">统一新闻处理</span>
-          {!collapsed && <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full">主功能</span>}
-        </div>
-      ),
+      label: <span className="font-medium">统一新闻处理</span>,
     },
   ]
 
@@ -287,31 +282,31 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
 
         {/* 搜索历史区域 */}
         {!collapsed && (
-          <div className="px-3 mt-6 flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden px-3 mt-6" style={{ paddingBottom: '160px' }}>
             <SearchHistory
               onSearchSelect={handleSearchHistorySelect}
               onHistoryRestore={handleHistoryRestore}
-              maxHeight="calc(100vh - 400px)"
+              maxHeight="100%"
             />
           </div>
         )}
 
         {/* 底部固定区域：用户信息和API状态 - 马卡农风格 */}
         {!collapsed && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 space-y-3 bg-gradient-to-t from-macaron-cream/80 to-transparent backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 p-4 space-y-3 bg-gradient-to-t from-macaron-cream/90 via-macaron-cream/80 to-transparent backdrop-blur-sm border-t border-white/20">
             {/* 用户信息卡片 */}
-            <div className="bg-white/60 backdrop-filter backdrop-blur-sm p-3 rounded-2xl border border-white/30 shadow-sm">
+            <div className="bg-white/70 backdrop-filter backdrop-blur-sm p-3 rounded-2xl border border-white/40 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex items-center space-x-3">
                 <Avatar
                   size="small"
                   icon={<UserOutlined />}
-                  className="bg-gradient-to-br from-macaron-pink to-macaron-lavender"
+                  className="bg-gradient-to-br from-macaron-pink to-macaron-lavender border-2 border-white/30"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-800 text-sm font-medium truncate">
+                  <p className="text-gray-800 text-sm font-semibold truncate">
                     {user?.nickname || user?.username || '用户'}
                   </p>
-                  <p className="text-gray-600 text-xs">
+                  <p className="text-gray-600 text-xs font-medium">
                     {user?.role === 'admin' ? '管理员' : '普通用户'}
                   </p>
                 </div>
@@ -319,18 +314,18 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
             </div>
 
             {/* API状态指示器 */}
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-filter backdrop-blur-sm border ${
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl backdrop-filter backdrop-blur-sm border transition-all duration-300 ${
               apiStatus === 'online'
-                ? 'bg-macaron-mint/40 text-green-700 border-green-200'
+                ? 'bg-macaron-mint/50 text-green-700 border-green-200 hover:bg-macaron-mint/60'
                 : apiStatus === 'offline'
-                ? 'bg-macaron-pink/40 text-red-700 border-red-200'
-                : 'bg-macaron-yellow/40 text-yellow-700 border-yellow-200'
+                ? 'bg-macaron-pink/50 text-red-700 border-red-200 hover:bg-macaron-pink/60'
+                : 'bg-macaron-yellow/50 text-yellow-700 border-yellow-200 hover:bg-macaron-yellow/60'
             }`}>
               <div className={`w-2 h-2 rounded-full ${
                 apiStatus === 'online' ? 'bg-green-500 animate-pulse' :
                 apiStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'
               }`} />
-              <span className="text-sm font-medium">
+              <span className="text-sm font-semibold">
                 {apiStatus === 'online' ? '服务正常' :
                  apiStatus === 'offline' ? '服务离线' : '检查中...'}
               </span>
@@ -434,18 +429,6 @@ export default function HomePage({ toggleTheme, isDarkMode }: HomePageProps) {
                     <p className="text-gray-600 text-sm md:text-base">
                       {getPageDescription()}
                     </p>
-                  </div>
-
-                  {/* API状态指示器 */}
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${
-                      apiStatus === 'online' ? 'bg-green-400' :
-                      apiStatus === 'offline' ? 'bg-red-400' : 'bg-yellow-400'
-                    }`}></div>
-                    <span className="text-gray-600 text-sm">
-                      {apiStatus === 'online' ? '服务正常' :
-                       apiStatus === 'offline' ? '服务离线' : '检查中...'}
-                    </span>
                   </div>
                 </div>
               </div>

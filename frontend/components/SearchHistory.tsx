@@ -149,32 +149,65 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             renderItem={(item: SearchHistoryItem) => (
               <List.Item
                 key={item.id}
-                className="search-history-item group cursor-pointer hover:bg-white/5 rounded-lg px-2 py-1 transition-all duration-200"
+                className="search-history-item group cursor-pointer transition-all duration-300"
                 onClick={() => handleHistorySelect(item)}
+                style={{
+                  border: 'none',
+                  padding: '16px 12px',
+                  borderRadius: '16px',
+                  marginBottom: '8px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  minHeight: '72px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+                  e.currentTarget.style.transform = 'translateX(6px) scale(1.02)'
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(168, 216, 240, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                  e.currentTarget.style.transform = 'translateX(0) scale(1)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
               >
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    {item.searchResult ? (
-                      <FileTextOutlined className="text-green-400 text-xs flex-shrink-0" />
-                    ) : (
-                      <SearchOutlined className="text-white/50 text-xs flex-shrink-0" />
-                    )}
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <div className="flex-shrink-0">
+                      {item.searchResult ? (
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-md">
+                          <FileTextOutlined className="text-white text-sm" />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
+                          <SearchOutlined className="text-white text-sm" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-white/90 text-sm truncate font-medium">
+                      <div className="text-gray-800 text-sm truncate font-semibold leading-tight">
                         {item.query}
                       </div>
-                      <div className="flex items-center space-x-2 mt-0.5">
+                      <div className="flex items-center space-x-3 mt-1">
                         <div className="flex items-center space-x-1">
-                          <ClockCircleOutlined className="text-white/40 text-xs" />
-                          <span className="text-white/40 text-xs">
+                          <ClockCircleOutlined className="text-gray-500 text-xs" />
+                          <span className="text-gray-500 text-xs font-medium">
                             {formatTime(item.timestamp)}
                           </span>
                         </div>
                         {item.searchResult && (
                           <div className="flex items-center space-x-1">
-                            <MessageOutlined className="text-green-400 text-xs" />
-                            <span className="text-green-400 text-xs">
-                              已保存结果
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span className="text-green-600 text-xs font-medium">
+                              完整结果已保存
+                            </span>
+                          </div>
+                        )}
+                        {item.chatMessages && item.chatMessages.length > 0 && (
+                          <div className="flex items-center space-x-1">
+                            <MessageOutlined className="text-purple-500 text-xs" />
+                            <span className="text-purple-500 text-xs font-medium">
+                              {item.chatMessages.length} 条对话
                             </span>
                           </div>
                         )}
@@ -182,16 +215,37 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
                     </div>
                   </div>
                   
-                  <Tooltip title="删除记录">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      loading={deleteLoading === item.id}
-                      onClick={(e) => handleDeleteRecord(e, item.id)}
-                      className="text-white/30 hover:text-red-400 hover:bg-red-500/10 border-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
-                    />
-                  </Tooltip>
+                  <div className="flex-shrink-0 ml-2">
+                    <Tooltip title="删除此记录" placement="left">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        loading={deleteLoading === item.id}
+                        onClick={(e) => handleDeleteRecord(e, item.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                        style={{
+                          border: 'none',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          color: '#EF4444',
+                          borderRadius: '12px',
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'
+                          e.currentTarget.style.transform = 'scale(1.1)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                          e.currentTarget.style.transform = 'scale(1)'
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
                 </div>
               </List.Item>
             )}

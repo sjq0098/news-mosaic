@@ -32,6 +32,7 @@ import { newsPipelineApi, enhancedChatApi } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useSearchHistory } from '../hooks/useSearchHistory'
 import MarkdownRenderer from './MarkdownRenderer'
+import RecentSearchCards from './RecentSearchCards'
 
 const { Search } = Input
 const { TabPane } = Tabs
@@ -100,6 +101,43 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
     max_cards: 5,
     personalization_level: 0.5
   })
+
+  // 热门话题数据
+  const [trendingTopics] = useState([
+    { id: 1, text: "人工智能伦理", category: "科技", heat: 95 },
+    { id: 2, text: "碳中和政策", category: "环保", heat: 88 },
+    { id: 3, text: "全球供应链动态", category: "经济", heat: 82 },
+    { id: 4, text: "数字货币监管", category: "金融", heat: 79 },
+    { id: 5, text: "新能源汽车", category: "科技", heat: 85 },
+    { id: 6, text: "元宇宙发展", category: "科技", heat: 76 },
+    { id: 7, text: "疫情后经济复苏", category: "经济", heat: 83 },
+    { id: 8, text: "教育数字化转型", category: "教育", heat: 71 }
+  ])
+
+  // 搜索示例数据
+  const [searchExamples] = useState([
+    {
+      id: 1,
+      query: "新能源汽车市场竞争格局",
+      description: "分析主要品牌动态、市场份额变化等行业洞察",
+      expectedResults: "获得特斯拉、比亚迪等品牌最新动态和竞争分析",
+      category: "商业分析"
+    },
+    {
+      id: 2,
+      query: "过去一周关于'量子计算'的突破性进展",
+      description: "快速了解前沿科技的最新动态和技术突破",
+      expectedResults: "收集最新研究成果、商业化进展和技术里程碑",
+      category: "科技前沿"
+    },
+    {
+      id: 3,
+      query: "2024年全球气候变化政策影响",
+      description: "深度分析各国政策变化对经济和社会的影响",
+      expectedResults: "综合各国气候政策、经济影响和社会反响",
+      category: "政策解读"
+    }
+  ])
 
   const handleNewsProcessing = async (query: string) => {
     if (!query.trim()) {
@@ -526,8 +564,18 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
     <div style={{ padding: '24px' }}>
       <div className="search-container macaron-search-container">
         <div className="search-header">
-          <h2 className="search-title macaron-title">探索新闻洞察</h2>
-          <p className="search-subtitle macaron-subtitle">输入关键词，发现最新新闻动态与深度分析</p>
+          <div className="welcome-illustration">
+            <div className="illustration-content">
+              <div className="floating-icons">
+                <div className="icon-bubble icon-1">📰</div>
+                <div className="icon-bubble icon-2">🔍</div>
+                <div className="icon-bubble icon-3">🤖</div>
+                <div className="icon-bubble icon-4">💡</div>
+              </div>
+              <h2 className="search-title macaron-title">开始您的新闻探索之旅</h2>
+              <p className="search-subtitle macaron-subtitle">输入关键词，让AI为您提供专业的新闻分析与洞察</p>
+            </div>
+          </div>
         </div>
         <div className="search-box-container">
           <Search
@@ -541,7 +589,8 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
                 style={{
                   background: 'linear-gradient(45deg, #D7F0E9, #FFF2CC)',
                   borderColor: 'transparent',
-                  color: '#4A5568'
+                  color: '#4A5568',
+                  fontWeight: '600'
                 }}
               >
                 智能分析
@@ -556,33 +605,35 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
             }}
           />
           <div className="search-options">
-            <Select
-              size="small"
-              value={config.num_results}
-              onChange={(value) => setConfig(prev => ({ ...prev, num_results: value }))}
-              className="search-option-select macaron-select"
-              style={{
-                borderRadius: '12px'
-              }}
-            >
-              <Option value={10}>10 条结果</Option>
-              <Option value={20}>20 条结果</Option>
-              <Option value={50}>50 条结果</Option>
-              <Option value={100}>100 条结果</Option>
-            </Select>
-            <Select
-              size="small"
-              value={config.max_cards}
-              onChange={(value) => setConfig(prev => ({ ...prev, max_cards: value }))}
-              className="search-option-select macaron-select"
-              style={{
-                borderRadius: '12px'
-              }}
-            >
-              <Option value={3}>3 张卡片</Option>
-              <Option value={5}>5 张卡片</Option>
-              <Option value={10}>10 张卡片</Option>
-            </Select>
+            <div className="option-group">
+              <label className="option-label">结果数量</label>
+              <Select
+                size="small"
+                value={config.num_results}
+                onChange={(value) => setConfig(prev => ({ ...prev, num_results: value }))}
+                className="search-option-select macaron-select"
+                style={{ borderRadius: '12px', minWidth: '100px' }}
+              >
+                <Option value={10}>10 条结果</Option>
+                <Option value={20}>20 条结果</Option>
+                <Option value={50}>50 条结果</Option>
+                <Option value={100}>100 条结果</Option>
+              </Select>
+            </div>
+            <div className="option-group">
+              <label className="option-label">卡片数量</label>
+              <Select
+                size="small"
+                value={config.max_cards}
+                onChange={(value) => setConfig(prev => ({ ...prev, max_cards: value }))}
+                className="search-option-select macaron-select"
+                style={{ borderRadius: '12px', minWidth: '100px' }}
+              >
+                <Option value={3}>3 张卡片</Option>
+                <Option value={5}>5 张卡片 (推荐)</Option>
+                <Option value={10}>10 张卡片</Option>
+              </Select>
+            </div>
             <Button
               size="small"
               type="text"
@@ -593,7 +644,7 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
                 borderRadius: '12px'
               }}
             >
-              高级设置
+              🔧 深度配置
             </Button>
           </div>
         </div>
@@ -601,7 +652,30 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
         {/* 高级设置模态框 - 马卡农风格 */}
         <div id="advanced-settings-modal" className="advanced-settings-modal">
           <Card 
-            title="高级处理设置" 
+            title={
+              <div className="flex items-center justify-between">
+                <span>🎛️ 深度处理配置</span>
+                <Button 
+                  type="link" 
+                  onClick={() => {
+                    setConfig({
+                      num_results: 10,
+                      enable_storage: true,
+                      enable_vectorization: true,
+                      enable_ai_analysis: true,
+                      enable_card_generation: true,
+                      enable_sentiment_analysis: true,
+                      enable_user_memory: true,
+                      max_cards: 5,
+                      personalization_level: 0.5
+                    })
+                  }}
+                  style={{ color: '#10B981', fontSize: '12px' }}
+                >
+                  恢复默认
+                </Button>
+              </div>
+            }
             size="small" 
             extra={<Button type="text" onClick={() => document.getElementById('advanced-settings-modal')?.classList.toggle('show')}>关闭</Button>}
             style={{
@@ -613,17 +687,261 @@ const UnifiedNewsProcessor = forwardRef<UnifiedNewsProcessorRef, UnifiedNewsProc
           >
             <Row gutter={16}>
               <Col span={24}>
-                <Space wrap>
-                  <span style={{ color: '#4A5568' }}>存储: <Switch size="small" checked={config.enable_storage} onChange={(checked) => setConfig(prev => ({ ...prev, enable_storage: checked }))} /></span>
-                  <span style={{ color: '#4A5568' }}>向量化: <Switch size="small" checked={config.enable_vectorization} onChange={(checked) => setConfig(prev => ({ ...prev, enable_vectorization: checked }))} /></span>
-                  <span style={{ color: '#4A5568' }}>AI分析: <Switch size="small" checked={config.enable_ai_analysis} onChange={(checked) => setConfig(prev => ({ ...prev, enable_ai_analysis: checked }))} /></span>
-                  <span style={{ color: '#4A5568' }}>卡片生成: <Switch size="small" checked={config.enable_card_generation} onChange={(checked) => setConfig(prev => ({ ...prev, enable_card_generation: checked }))} /></span>
-                </Space>
+                <div className="advanced-options-grid">
+                  <div className="option-item">
+                    <div className="option-header">
+                      <span style={{ color: '#4A5568', fontWeight: '500' }}>📚 数据存储</span>
+                      <Switch 
+                        size="small" 
+                        checked={config.enable_storage} 
+                        onChange={(checked) => setConfig(prev => ({ ...prev, enable_storage: checked }))} 
+                      />
+                    </div>
+                    <p className="option-description">保存搜索结果以便后续分析</p>
+                  </div>
+                  <div className="option-item">
+                    <div className="option-header">
+                      <span style={{ color: '#4A5568', fontWeight: '500' }}>🧠 向量化处理</span>
+                      <Switch 
+                        size="small" 
+                        checked={config.enable_vectorization} 
+                        onChange={(checked) => setConfig(prev => ({ ...prev, enable_vectorization: checked }))} 
+                      />
+                    </div>
+                    <p className="option-description">启用语义相似度分析，提升深度洞察准确性</p>
+                  </div>
+                  <div className="option-item">
+                    <div className="option-header">
+                      <span style={{ color: '#4A5568', fontWeight: '500' }}>🤖 AI智能分析</span>
+                      <Switch 
+                        size="small" 
+                        checked={config.enable_ai_analysis} 
+                        onChange={(checked) => setConfig(prev => ({ ...prev, enable_ai_analysis: checked }))} 
+                      />
+                    </div>
+                    <p className="option-description">生成智能摘要和趋势分析</p>
+                  </div>
+                  <div className="option-item">
+                    <div className="option-header">
+                      <span style={{ color: '#4A5568', fontWeight: '500' }}>💎 智能卡片</span>
+                      <Switch 
+                        size="small" 
+                        checked={config.enable_card_generation} 
+                        onChange={(checked) => setConfig(prev => ({ ...prev, enable_card_generation: checked }))} 
+                      />
+                    </div>
+                    <p className="option-description">自动生成新闻事件核心要点卡片</p>
+                  </div>
+                </div>
               </Col>
             </Row>
           </Card>
         </div>
       </div>
+
+      {/* 当没有搜索结果时显示的引导内容 */}
+      {!result && !loading && (
+        <div className="guidance-section" style={{ marginTop: '32px' }}>
+          {/* 热门话题区域 */}
+          <div 
+            className="trending-topics-section"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px',
+              marginBottom: '24px'
+            }}
+          >
+            <div className="section-header" style={{ marginBottom: '20px' }}>
+              <h3 className="section-title" style={{ color: '#4A5568', fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🔥 热门话题 <span style={{ fontSize: '14px', color: '#718096', fontWeight: '400' }}>点击快速搜索</span>
+              </h3>
+            </div>
+            <div className="trending-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              {trendingTopics.map((topic) => (
+                <div
+                  key={topic.id}
+                  className="topic-tag"
+                  onClick={() => handleNewsProcessing(topic.text)}
+                  style={{
+                    padding: '12px 16px',
+                    background: `linear-gradient(45deg, rgba(215, 240, 233, ${topic.heat / 100}), rgba(255, 242, 204, ${topic.heat / 100}))`,
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(168, 216, 240, 0.3)'
+                    e.currentTarget.style.background = 'linear-gradient(45deg, #D7F0E9, #FFF2CC)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.background = `linear-gradient(45deg, rgba(215, 240, 233, ${topic.heat / 100}), rgba(255, 242, 204, ${topic.heat / 100}))`
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#2D3748', fontWeight: '500', fontSize: '14px' }}>{topic.text}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ 
+                        width: '6px', 
+                        height: '6px', 
+                        borderRadius: '50%', 
+                        background: topic.heat > 90 ? '#EF4444' : topic.heat > 80 ? '#F59E0B' : '#10B981',
+                        animation: topic.heat > 90 ? 'gentle-pulse 2s infinite' : 'none'
+                      }} />
+                      <span style={{ fontSize: '12px', color: '#718096', fontWeight: '500' }}>{topic.heat}</span>
+                    </div>
+                  </div>
+                  <div style={{ 
+                    fontSize: '11px', 
+                    color: '#A0AEC0', 
+                    marginTop: '4px',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    padding: '2px 6px',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>
+                    {topic.category}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 搜索示例区域 */}
+          <div 
+            className="search-examples-section"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px',
+              marginBottom: '24px'
+            }}
+          >
+            <div className="section-header" style={{ marginBottom: '20px' }}>
+              <h3 className="section-title" style={{ color: '#4A5568', fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                💡 搜索示例 <span style={{ fontSize: '14px', color: '#718096', fontWeight: '400' }}>学习如何高效使用平台</span>
+              </h3>
+            </div>
+            <div className="search-examples-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              {searchExamples.map((example) => (
+                <div
+                  key={example.id}
+                  className="example-card"
+                  style={{
+                    padding: '20px',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'pointer',
+                    position: 'relative'
+                  }}
+                  onClick={() => handleNewsProcessing(example.query)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 12px 30px rgba(168, 216, 240, 0.25)'
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+                  }}
+                >
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ 
+                      fontSize: '12px', 
+                      color: '#7C3AED', 
+                      fontWeight: '600',
+                      background: 'rgba(124, 58, 237, 0.1)',
+                      padding: '4px 8px',
+                      borderRadius: '8px',
+                      display: 'inline-block',
+                      marginBottom: '8px'
+                    }}>
+                      {example.category}
+                    </div>
+                    <h4 style={{ 
+                      color: '#2D3748', 
+                      fontWeight: '600', 
+                      fontSize: '16px', 
+                      margin: '0 0 8px 0',
+                      lineHeight: '1.4'
+                    }}>
+                      "{example.query}"
+                    </h4>
+                  </div>
+                  <p style={{ 
+                    color: '#4A5568', 
+                    fontSize: '14px', 
+                    lineHeight: '1.5', 
+                    margin: '0 0 12px 0'
+                  }}>
+                    {example.description}
+                  </p>
+                  <div style={{
+                    padding: '12px',
+                    background: 'rgba(215, 240, 233, 0.3)',
+                    borderRadius: '12px',
+                    borderLeft: '3px solid #10B981'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#059669', fontWeight: '600', marginBottom: '4px' }}>
+                      预期结果：
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#065F46', lineHeight: '1.4' }}>
+                      {example.expectedResults}
+                    </div>
+                  </div>
+                  <div style={{ 
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    background: 'linear-gradient(45deg, #D7F0E9, #FFF2CC)',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px'
+                  }}>
+                    🚀
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 最近搜索历史展示区域 */}
+          <div 
+            className="recent-searches-section"
+            style={{
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              padding: '24px'
+            }}
+          >
+            <div className="section-header" style={{ marginBottom: '20px' }}>
+              <h3 className="section-title" style={{ color: '#4A5568', fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📚 继续上次的工作 <span style={{ fontSize: '14px', color: '#718096', fontWeight: '400' }}>快速恢复之前的分析</span>
+              </h3>
+            </div>
+            <RecentSearchCards onHistoryRestore={restoreHistoryState} />
+          </div>
+        </div>
+      )}
 
       {/* 处理结果 */}
       {result && (
