@@ -44,7 +44,7 @@
 ## 四、环境依赖  
 - Node.js ≥ 16.x  
 - Python ≥ 3.9  
-- MongoDB ≥ 4.4 或 MySQL ≥ 8.0  
+- MongoDB ≥ 4.4  
 - Redis ≥ 6.x  
 - Pinecone/Weaviate 账号  
 - SerpAPI Key  
@@ -54,7 +54,7 @@
 
 1. **克隆仓库**  
    ```bash
-   git clone https://github.com/your-org/news-mosaic.git
+   git clone https://github.com/sjq0098/news-mosaic.git
    cd news-mosaic
   ```
 
@@ -81,7 +81,7 @@
 
      ```bash
      cd backend
-     uvicorn main:app --reload
+     python main:app --reload
      ```
    * 前端：
 
